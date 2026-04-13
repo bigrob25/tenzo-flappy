@@ -1180,6 +1180,7 @@ function startGame(){
   closeBtn.addEventListener('click', function(){
     localStorage.setItem('tenzo_rules_seen','1');
     hideRules();
+    document.getElementById('startBtn').click();
   });
   htpLink.addEventListener('click', showRules);
 
