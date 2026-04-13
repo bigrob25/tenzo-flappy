@@ -306,85 +306,52 @@ function drawCan(bx,by,angle,wFlap,energy,boosted,frame,coffeed,inGrace){
   }
 
   // ── BAG BODY ──────────────────────────────────────────────────────────────
-  // Main bag — rounded rectangle, all Tenzo green
-  rrect(-hpw,-hph,pw,ph,10,bagMain,C.outline,3);
+  // Main bag — sharp corners, all Tenzo green
+  ctx.fillStyle=bagMain;
+  ctx.fillRect(-hpw,-hph,pw,ph);
+  ctx.strokeStyle=C.outline; ctx.lineWidth=3; ctx.lineJoin='miter';
+  ctx.strokeRect(-hpw,-hph,pw,ph);
 
-  // Shimmer gradient (top-left highlight, like real bag)
+  // Shimmer gradient
   ctx.save();
   var grad=ctx.createLinearGradient(-hpw,-hph,hpw*0.2,hph*0.4);
   grad.addColorStop(0,'rgba(255,255,255,0.22)');
-  grad.addColorStop(0.5,'rgba(255,255,255,0.06)');
   grad.addColorStop(1,'rgba(255,255,255,0)');
   ctx.fillStyle=grad;
-  rrect(-hpw,-hph,pw,ph,10,null,null);
-  ctx.fill();
+  ctx.fillRect(-hpw,-hph,pw,ph);
   ctx.restore();
 
   // Boost/grace tint
   if(boosted||inGrace){
     ctx.save(); ctx.globalAlpha=0.2;
     ctx.fillStyle=inGrace?C.latte:C.yellow;
-    rrect(-hpw,-hph,pw,ph,10,null,null); ctx.fill();
+    ctx.fillRect(-hpw,-hph,pw,ph);
     ctx.restore();
   }
 
   // Top heat seal
   ctx.fillStyle=bagDark;
-  ctx.fillRect(-hpw+4,-hph+2,pw-8,6);
+  ctx.fillRect(-hpw,-hph,pw,7);
   ctx.fillStyle='rgba(255,255,255,0.18)';
-  ctx.fillRect(-hpw+7,-hph+3,pw-14,2);
+  ctx.fillRect(-hpw+4,-hph+2,pw-8,2);
 
-  // Side gusset lines (give the bag depth)
+  // Side gusset lines
   ctx.save(); ctx.globalAlpha=0.35; ctx.strokeStyle=bagDark; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(-hpw+9,-hph+9); ctx.lineTo(-hpw+9,hph-9); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(hpw-9,-hph+9); ctx.lineTo(hpw-9,hph-9); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-hpw+9,-hph+8); ctx.lineTo(-hpw+9,hph-8); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hpw-9,-hph+8); ctx.lineTo(hpw-9,hph-8); ctx.stroke();
   ctx.restore();
 
   // Bottom heat seal
   ctx.fillStyle=bagDark;
-  ctx.fillRect(-hpw+4,hph-8,pw-8,6);
+  ctx.fillRect(-hpw,hph-7,pw,7);
 
-  // ── BAG LABEL DETAILS ─────────────────────────────────────────────────────
-  // TENZO — large bold white, centered upper area
-  ctx.font='bold 17px -apple-system,sans-serif';
+  // ── TENZO text — sized to fit bag width ───────────────────────────────────
+  ctx.font='bold 16px -apple-system,sans-serif';
   ctx.fillStyle='#ffffff';
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.shadowColor='rgba(0,60,0,0.4)'; ctx.shadowBlur=4;
-  ctx.fillText('TENZO',0,-10);
+  ctx.shadowColor='rgba(0,50,0,0.5)'; ctx.shadowBlur=3;
+  ctx.fillText('TENZO',0,-8);
   ctx.shadowBlur=0;
-
-  // Small circular badge — top left (like "PURE MATCHA / JAPAN GROWN")
-  ctx.save();
-  ctx.translate(-hpw+15,-hph+18);
-  ctx.beginPath(); ctx.arc(0,0,9,0,Math.PI*2);
-  ctx.fillStyle=bagDark; ctx.fill();
-  ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=1.5; ctx.stroke();
-  ctx.font='bold 3.5px -apple-system,sans-serif';
-  ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('PURE',0,-2.5);
-  ctx.fillText('MATCHA',0,2.5);
-  ctx.restore();
-
-  // Leaf motif — top right (decorative, like real bag)
-  ctx.save();
-  ctx.translate(hpw-11,-hph+14);
-  ctx.globalAlpha=0.35;
-  ctx.beginPath();
-  ctx.moveTo(0,0); ctx.quadraticCurveTo(7,-9,0,-18); ctx.quadraticCurveTo(-7,-9,0,0);
-  ctx.fillStyle=bagDark; ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(4,-4); ctx.quadraticCurveTo(10,-12,4,-20); ctx.quadraticCurveTo(-2,-12,4,-4);
-  ctx.fill();
-  ctx.restore();
-
-  // "ORIGINAL BLEND" bottom-left (subtle, like real bag)
-  ctx.save();
-  ctx.font='bold 4.5px -apple-system,sans-serif';
-  ctx.fillStyle='rgba(255,255,255,0.45)';
-  ctx.textAlign='left'; ctx.textBaseline='middle';
-  ctx.fillText('ORIGINAL',-hpw+12,hph-20);
-  ctx.fillText('BLEND',-hpw+12,hph-14);
-  ctx.restore();
 
   // ── FACE ──────────────────────────────────────────────────────────────────
   var fy=14;
