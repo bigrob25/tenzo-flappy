@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Left wing -->
+  <ellipse cx="11" cy="33" rx="10" ry="6" fill="#00c47a" stroke="#163029" stroke-width="1.5" transform="rotate(-20 11 33)"/>
+  <!-- Right wing -->
+  <ellipse cx="53" cy="33" rx="10" ry="6" fill="#00c47a" stroke="#163029" stroke-width="1.5" transform="rotate(20 53 33)"/>
+  <!-- Bag body -->
+  <rect x="16" y="8" width="32" height="48" fill="#007853" stroke="#163029" stroke-width="2"/>
+  <!-- Top seal -->
+  <rect x="16" y="8" width="32" height="7" fill="#005238"/>
+  <!-- Bottom seal -->
+  <rect x="16" y="49" width="32" height="7" fill="#005238"/>
+  <!-- Shimmer -->
+  <rect x="16" y="8" width="12" height="24" fill="rgba(255,255,255,0.15)" rx="1"/>
+  <!-- TENZO text -->
+  <text x="32" y="30" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="8" fill="white" text-anchor="middle" dominant-baseline="middle" letter-spacing="0.5">TENZO</text>
+  <!-- Eyes -->
+  <circle cx="26" cy="39" r="3" fill="rgba(0,40,0,0.75)"/>
+  <circle cx="38" cy="39" r="3" fill="rgba(0,40,0,0.75)"/>
+  <!-- Eye shine -->
+  <circle cx="27" cy="38" r="1" fill="white"/>
+  <circle cx="39" cy="38" r="1" fill="white"/>
+  <!-- Smile -->
+  <path d="M27 45 Q32 49 37 45" stroke="rgba(0,40,0,0.75)" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>
