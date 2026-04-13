@@ -77,6 +77,10 @@ canvas{display:block;touch-action:none;}
 #submit-btn:active{opacity:0.8;}
 #submit-msg{font-size:11px;color:#a8d878;font-weight:700;letter-spacing:1px;min-height:16px;}
 #lb-table{width:100%;max-width:280px;}
+#lb-rows{max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(168,216,120,0.4) transparent;}
+#lb-rows::-webkit-scrollbar{width:4px;}
+#lb-rows::-webkit-scrollbar-track{background:transparent;}
+#lb-rows::-webkit-scrollbar-thumb{background:rgba(168,216,120,0.4);border-radius:2px;}
 #lb-table .lb-title{color:#a8d878;font-size:11px;font-weight:900;letter-spacing:2px;
   text-align:center;margin-bottom:6px;}
 #lb-table .lb-row{display:flex;align-items:center;gap:6px;padding:4px 0;
@@ -1252,7 +1256,7 @@ splashLoop();
   }
 
   function loadLeaderboard(){
-    sbFetch('GET', 'leaderboard?select=name,score&order=score.desc&limit=10')
+    sbFetch('GET', 'leaderboard?select=name,score&order=score.desc&limit=25')
       .then(function(r){ return r.json(); })
       .then(function(rows){
         var html = '';
