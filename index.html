@@ -28,7 +28,7 @@ canvas{display:block;}
 .bar-bg{flex:1;height:11px;background:rgba(0,0,0,0.25);border-radius:8px;
   overflow:hidden;border:2px solid rgba(0,0,0,0.3);}
 .bar-fill{height:100%;width:100%;border-radius:6px;transition:width .08s linear,background .2s;}
-#ebar-fill{background:#5cb85c;}
+#ebar-fill{background:#006548;}
 #bbar-fill{width:0%;background:#f5dfc0;}
 #ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:14px;background:rgba(20,45,20,0.95);border-radius:16px;}
@@ -38,10 +38,10 @@ canvas{display:block;}
 .op{color:#d8f0d0;font-size:12px;text-align:center;max-width:260px;line-height:2;font-weight:500;}
 .big-n{font-size:68px;font-weight:900;color:#f0e060;line-height:1;}
 .bl{color:#a8d878;font-size:12px;font-weight:700;letter-spacing:2px;}
-.btn{background:#5cb85c;border:none;color:#fff;font-weight:900;font-size:18px;letter-spacing:2px;
-  padding:13px 40px;border-radius:50px;cursor:pointer;border:3px solid #1a6a1a;
-  box-shadow:0 5px 0 #1a5a1a;}
-.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1a5a1a;}
+.btn{background:#006548;border:none;color:#fff;font-weight:900;font-size:18px;letter-spacing:2px;
+  padding:13px 40px;border-radius:50px;cursor:pointer;border:3px solid #163029;
+  box-shadow:0 5px 0 #163029;}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #163029;}
 .hint{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:3px;text-transform:uppercase;
   animation:blink 1.5s infinite;}
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:.9}}
@@ -73,7 +73,7 @@ canvas{display:block;}
 <body>
 <div id="wrap">
   <div id="topbar">
-    <div id="logo">TENZO<small>STAY AIRBORNE</small></div>
+    <div id="logo">TENZO<small>BETTER EVERY DAY</small></div>
     <div id="score-badge">⭐ <span id="sc">0</span> &nbsp;🏆 <span id="hs">0</span></div>
   </div>
   <div id="cw">
@@ -215,6 +215,32 @@ function drawBG(frame, boosted){
   // Sky — flat Tenzo sage green like illustration background
   ctx.fillStyle = boosted ? '#c8a870' : C.skyLight;
   ctx.fillRect(0,0,W,H);
+
+  // Tenzo Sun — subtle brand watermark in sky
+  ctx.save();
+  ctx.globalAlpha = boosted ? 0.12 : 0.07;
+  ctx.translate(W*0.78, H*0.22);
+  var sr = W*0.13; // sun radius
+  // Outer rays — flame-leaf shapes like the brand icon
+  var rayCount = 11;
+  for(var ri=0; ri<rayCount; ri++){
+    var ra = (ri/rayCount)*Math.PI*2;
+    ctx.save(); ctx.rotate(ra);
+    ctx.beginPath();
+    ctx.moveTo(0, -sr*0.45);
+    ctx.bezierCurveTo(sr*0.18, -sr*0.7, sr*0.22, -sr*1.05, 0, -sr*1.1);
+    ctx.bezierCurveTo(-sr*0.22, -sr*1.05, -sr*0.18, -sr*0.7, 0, -sr*0.45);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    ctx.restore();
+  }
+  // Inner circle
+  ctx.beginPath(); ctx.arc(0,0,sr*0.42,0,Math.PI*2);
+  ctx.fillStyle='#ffffff'; ctx.fill();
+  // Inner ring cutout
+  ctx.beginPath(); ctx.arc(0,0,sr*0.22,0,Math.PI*2);
+  ctx.fillStyle= boosted ? '#c8a870' : C.skyLight; ctx.fill();
+  ctx.restore();
 
   // Rolling hills — layered flat shapes like the illustration
   // Far hill
@@ -714,7 +740,7 @@ function update(){
 
   if(!G.boosted&&!inGrace){
     G.energy=Math.max(0,G.energy-E_DRAIN);
-    if(G.energy<=0){die('OUT OF ENERGY!','Grab those green leaves!');return;}
+    if(G.energy<=0){die('ENERGY DRAINED!','Every sip is a fresh start. 🍃');return;}
   }
   if(G.boosted){
     G.booster=Math.max(0,G.booster-BOOST_DRN);
@@ -734,7 +760,7 @@ function update(){
   G.trail.push({x:b.x,y:b.y}); if(G.trail.length>30)G.trail.shift();
 
   if(!G.boosted&&!inGrace){
-    if(b.y>H-38||b.y<8){die('CRASH!','Watch the floor and ceiling!');return;}
+    if(b.y>H-38||b.y<8){die('STAY FOCUSED!','Better luck tomorrow. Keep going!');return;}
   } else {
     if(b.y>H-38){b.y=H-38;b.vy=-2;} if(b.y<8){b.y=8;b.vy=2;}
   }
@@ -753,8 +779,8 @@ function update(){
     var p=G.pipes[i]; p.x-=G.speed;
     if(p.x<-80){G.pipes.splice(i,1);continue;}
     if(G.boosted||inGrace) continue;
-    if(circleRect(b.x,b.y,13,p.x-14,0,28,p.topH)){die('HIT BAMBOO!','Squeeze through the gap!');return;}
-    if(circleRect(b.x,b.y,13,p.x-14,p.botY,28,H-p.botY)){die('HIT BAMBOO!','Squeeze through the gap!');return;}
+    if(circleRect(b.x,b.y,13,p.x-14,0,28,p.topH)){die('STAY FOCUSED!','Find your flow and try again.');return;}
+    if(circleRect(b.x,b.y,13,p.x-14,p.botY,28,H-p.botY)){die('STAY FOCUSED!','Find your flow and try again.');return;}
   }
 
   // Leaves
@@ -882,7 +908,7 @@ function draw(){
     ctx.save();ctx.globalAlpha=0.7+0.3*Math.sin(G.frame*0.3);
     ctx.font='bold 12px -apple-system,sans-serif';
     ctx.fillStyle=C.red;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('COFFEE CRASH — FLAP HARDER!',W/2,H*0.12);
+    ctx.fillText('☕ COFFEE CRASH — MATCHA UP!',W/2,H*0.12);
     ctx.restore();
   }
 
