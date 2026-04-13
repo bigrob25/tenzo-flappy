@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Tenzo Flappy</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta property="og:title" content="Tenzo Flappy">
+<meta property="og:description" content="Flap your way through the bamboo! The official Tenzo Tea game. Better every day.">
+<meta property="og:image" content="https://play.tenzotea.co/preview.png">
+<meta property="og:url" content="https://play.tenzotea.co">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tenzo Flappy">
+<meta name="twitter:description" content="Flap your way through the bamboo! The official Tenzo Tea game.">
+<meta name="twitter:image" content="https://play.tenzotea.co/preview.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{
@@ -32,11 +41,17 @@ canvas{display:block;}
 #ebar-fill{background:#006548;}
 #bbar-fill{width:0%;background:#f5dfc0;}
 #ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:14px;background:rgba(20,45,20,0.95);border-radius:16px;}
+  justify-content:flex-end;padding-bottom:20px;gap:12px;
+  background:linear-gradient(to bottom,rgba(8,22,8,0) 0%,rgba(8,22,8,0.05) 36%,rgba(8,22,8,0.92) 54%,rgba(5,14,5,0.98) 66%);
+  border-radius:16px;}
 #ov.hide{display:none;}
+#ov.dead{background:rgba(20,45,20,0.95);justify-content:center;}
+#ov-art{flex:1;width:100%;min-height:0;}
 .oh{color:#a8d878;font-size:clamp(28px,9vw,46px);font-weight:900;letter-spacing:2px;
-  text-align:center;line-height:1.1;}
-.op{color:#d8f0d0;font-size:12px;text-align:center;max-width:260px;line-height:2;font-weight:500;}
+  text-align:center;line-height:1.1;display:none;}
+.oh.show{display:block;}
+.op{color:#d8f0d0;font-size:12px;text-align:center;max-width:260px;line-height:2;font-weight:500;display:none;}
+.op.show{display:block;}
 .big-n{font-size:68px;font-weight:900;color:#f0e060;line-height:1;}
 .bl{color:#a8d878;font-size:12px;font-weight:700;letter-spacing:2px;}
 .btn{background:#006548;border:none;color:#fff;font-weight:900;font-size:18px;letter-spacing:2px;
@@ -80,18 +95,9 @@ canvas{display:block;}
   <div id="cw">
     <canvas id="c"></canvas>
     <div id="ov">
-      <div class="oh" id="oh">TENZO<br>FLAPPY</div>
-      <div class="op" id="op">
-        <div style="text-align:left;line-height:2.1;">
-          👆 <b>Tap</b> to flap &amp; fly<br>
-          ⚡ Energy drains — don't run out!<br>
-          🍃 Grab <b>leaves</b> to recharge<br>
-          🎋 Fly through <b>bamboo</b> gaps<br>
-          🌊 <b>Waterfalls</b> push you down<br>
-          ☕ <b>Coffee clouds</b> weaken your flap<br>
-          🥛 <b>Latte cup</b> = full invincibility!
-        </div>
-      </div>
+      <div id="ov-art"></div>
+      <div class="oh" id="oh"></div>
+      <div class="op" id="op"></div>
       <div class="big-n" id="fn" style="display:none"></div>
       <div class="bl"    id="fb" style="display:none"></div>
       <div id="lb-section">
@@ -560,6 +566,81 @@ function drawBamboo(px,topH,botY,boosted,frame){
   if(bh>180) drawBambooSideLeaves(ox,botY+bh*0.65,-1);
 }
 
+// ── SPLASH SCREEN (animated canvas art shown before game starts) ──────────
+var splashF=0, splashRaf=null;
+function drawSplash(f){
+  ctx.clearRect(0,0,W,H);
+  drawBG(f, false);
+
+  // Bamboo on far left and right — gap centred at ~40% height
+  var gapMid = H*0.40;
+  var topH   = gapMid - GAP*0.48;
+  var botY   = gapMid + GAP*0.52;
+  drawBamboo(W*0.13, topH, botY, false, f);
+  drawBamboo(W*0.87, topH+18, botY+18, false, f);
+
+  // Speed lines behind character
+  ctx.save();
+  var cx=W*0.5, cy=gapMid;
+  ctx.lineCap='round';
+  for(var i=0;i<8;i++){
+    var oy=(i-3.5)*10;
+    var len=30+(i%3)*16+(f%14);
+    ctx.globalAlpha=0.1+(i%3)*0.07;
+    ctx.strokeStyle='rgba(255,255,255,0.9)';
+    ctx.lineWidth=1.5+(i%2);
+    ctx.beginPath();
+    ctx.moveTo(cx-60,cy+oy);
+    ctx.lineTo(cx-60-len,cy+oy);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Character — 1.5× scale, nose-up flight attitude
+  ctx.save();
+  ctx.translate(W*0.5, gapMid);
+  ctx.scale(1.5,1.5);
+  drawCan(0, 0, -0.20, 0.38+0.28*Math.sin(f*0.17), 0.78, false, f, false, false);
+  ctx.restore();
+
+  // Floating leaves orbiting the character
+  for(var li=0;li<5;li++){
+    var ang=(f*0.025+li*1.25)%(Math.PI*2);
+    var lx=W*0.5+Math.cos(ang)*W*0.28;
+    var ly=gapMid+Math.sin(ang*0.8)*H*0.07;
+    if(lx>32&&lx<W-32) drawLeaf(lx,ly,f*0.05+li);
+  }
+
+  // "TENZO" + "FLAPPY" — drawn on canvas so they sit inside the transparent top
+  var pulse=1+0.025*Math.sin(f*0.08);
+  ctx.save();
+  ctx.translate(W*0.5, H*0.115);
+  ctx.scale(pulse,pulse);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  // Glow
+  ctx.shadowColor='rgba(0,60,0,0.7)'; ctx.shadowBlur=18;
+  ctx.font='bold 56px -apple-system,sans-serif';
+  ctx.fillStyle='#a8d878';
+  ctx.fillText('TENZO',0,0);
+  ctx.shadowBlur=10;
+  ctx.font='bold 38px -apple-system,sans-serif';
+  ctx.fillStyle='#ffffff';
+  ctx.fillText('FLAPPY',0,50);
+  ctx.shadowBlur=0;
+  ctx.restore();
+  // Tagline
+  ctx.save();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='600 11px -apple-system,sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.52)';
+  ctx.fillText('BETTER EVERY DAY',W*0.5,H*0.225);
+  ctx.restore();
+}
+function splashLoop(){
+  drawSplash(splashF++);
+  splashRaf=requestAnimationFrame(splashLoop);
+}
+
 // ── WATERFALL (flat illustration style) ──────────────────────────────────
 function drawWaterfall(wx,ww,wh,frame){
   var ox=wx-ww/2;
@@ -992,26 +1073,38 @@ function die(title,msg){
   var finalScore=G.score;
   burst(G.bird.x,G.bird.y,C.red,20);
   setTimeout(function(){
+    var ov=document.getElementById('ov');
+    ov.classList.add('dead');
     document.getElementById('oh').textContent=title;
+    document.getElementById('oh').classList.add('show');
     document.getElementById('op').innerHTML=msg;
+    document.getElementById('op').classList.add('show');
     document.getElementById('fn').style.display='block';
     document.getElementById('fn').textContent=finalScore;
     document.getElementById('fb').style.display='block';
     document.getElementById('fb').textContent='🏆 BEST: '+hi;
     document.getElementById('startBtn').textContent='FLY AGAIN';
-    document.getElementById('ov').classList.remove('hide');
+    ov.classList.remove('hide');
     document.dispatchEvent(new CustomEvent('tenzo:die',{detail:{score:finalScore}}));
   },500);
 }
 function startGame(){
+  if(splashRaf){ cancelAnimationFrame(splashRaf); splashRaf=null; }
   if(raf) cancelAnimationFrame(raf);
   G=newGame();
-  document.getElementById('ov').classList.add('hide');
+  var ov=document.getElementById('ov');
+  ov.classList.remove('dead');
+  ov.classList.add('hide');
+  document.getElementById('oh').classList.remove('show');
+  document.getElementById('op').classList.remove('show');
   document.getElementById('fn').style.display='none';
   document.getElementById('fb').style.display='none';
   document.dispatchEvent(new CustomEvent('tenzo:start'));
   loop();
 }
+
+// Kick off the splash animation immediately
+splashLoop();
 
 })();
 

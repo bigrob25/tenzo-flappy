@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8e8c0"/>
+      <stop offset="100%" stop-color="#b0d4a8"/>
+    </linearGradient>
+    <linearGradient id="bagGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00a06a" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#007853" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="stalkL" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#88cc80"/>
+      <stop offset="40%" stop-color="#5cb85c"/>
+      <stop offset="100%" stop-color="#3a6b3a"/>
+    </linearGradient>
+    <linearGradient id="stalkR" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#3a6b3a"/>
+      <stop offset="60%" stop-color="#5cb85c"/>
+      <stop offset="100%" stop-color="#88cc80"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Sky background -->
+  <rect width="1200" height="630" fill="url(#sky)"/>
+
+  <!-- Far hill -->
+  <path d="M0,360 Q300,240 600,310 Q900,380 1200,280 L1200,630 L0,630 Z" fill="#3a6b3a"/>
+  <!-- Mid hill -->
+  <path d="M0,430 Q240,340 550,400 Q840,460 1200,390 L1200,630 L0,630 Z" fill="#4a8a40"/>
+  <!-- Ground -->
+  <rect y="520" width="1200" height="110" fill="#2a4a2a"/>
+  <rect y="520" width="1200" height="4" fill="#e8f5e0"/>
+
+  <!-- Tenzo Sun watermark -->
+  <g opacity="0.1" transform="translate(880,40) scale(0.13)">
+    <circle cx="509.62" cy="503.11" r="118.05" fill="#163029"/>
+    <path fill="#163029" d="M788.39,674.97c2.85,6.07,5.59,11.77,8.2,17.54,17.73,39.07,17.01,78.33,1.21,117.75-1.6,3.98-4.16,6.57-8.73,6.78-4.99.23-7.87-2.47-9.82-6.64-7.69-16.4-16.78-31.87-28.73-45.62-9.62-11.06-21.67-18.83-33.97-26.36-1.11-.68-2.49-.92-4.11-1.5-2.12,15.16-1.99,29.9.94,44.53,8.21,40.88,30.82,72.54,63.28,97.74,8.38,6.5,17.08,12.59,25.5,19.04,2.11,1.62,4.23,3.63,5.42,5.94,3.13,6.06-.92,12.32-8.75,13.51-7.48,1.14-15.02,2.34-22.56,2.63-49.67,1.96-95.09-10.35-135.05-40.74-17.21-13.09-30.78-29.55-43.79-46.57-1.82-2.38-3.69-4.71-5.86-7.47-2.84,6.99-5.27,13.47-8.07,19.78-12.15,27.4-28.58,51.55-54.75,67.35-8.83,5.33-18.94,8.55-28.55,12.54-4.08,1.69-7.79.54-10.65-2.82-3.08-3.61-2.77-7.5-.6-11.42,6.21-11.2,11.04-22.93,13.33-35.56,4.02-22.13,1.14-43.14-10.81-62.54-.3-.48-.69-.91-1.12-1.46-32.38,30.99-54.65,67.14-59.73,112.45-2.13,19.06-.53,37.81,4.17,56.36.45,1.76.95,3.53,1.13,5.32.71,6.95-5.35,12.03-11.97,9.91-2.26-.72-4.46-1.92-6.42-3.3-35.77-25.16-57.63-59.93-69.38-101.47-9.35-33.03-10.14-66.65-6.07-100.53.14-1.19.28-2.39.5-4.18-1.52.8-2.66,1.34-3.75,1.97-26.7,15.46-55.22,23.14-86.2,19.73-18.46-2.03-35.62-8.26-51.92-16.99-4.23-2.27-5.27-5.96-4.66-10.39.57-4.18,3.23-6.23,7.11-7.22,14.58-3.7,28.74-8.5,41.72-16.32,9.69-5.84,18.51-12.65,25.05-22.08,5.5-7.93,8.04-16.81,9.05-27.38-11.23.49-22.16.2-32.88,1.57-32.78,4.2-62.12,16.8-87.66,37.89-13.57,11.2-23.96,25.25-34.6,39.06-1.57,2.03-3.1,4.1-4.73,6.08-2.61,3.16-5.87,4.81-10.03,3.73-4.09-1.05-6.67-3.8-7.19-7.91-2.28-17.89-4.86-35.75-3-53.89,3.5-34.27,15.29-65.32,35.94-92.91,14.64-19.56,32.1-36.25,52.12-50.26,1.56-1.1,3.1-2.23,5.45-3.92-5.94-1.49-10.91-2.68-15.84-3.97-40.93-10.72-70.9-35.64-92.48-71.42-1.41-2.33-2.8-4.69-4.03-7.12-2.08-4.14-2.21-8.09,1.28-11.71,3.5-3.64,7.37-3.34,11.68-1.73,11.47,4.3,22.81,9.11,34.55,12.51,17.4,5.03,35.24,7.74,53.45,5.16,9.22-1.31,17.87-4.17,25.49-10.32-34.56-34.71-72.52-62.89-121.83-71.3-22.54-3.84-44.72-1.4-66.06,7.23-1.12.45-2.23.96-3.37,1.36-4.46,1.54-8.53.91-11.42-2.98-2.84-3.83-2.61-8.15.1-11.86,5.8-7.95,11.44-16.09,17.99-23.39,30.54-34.08,67.74-56.95,113.05-65.67,26.55-5.11,53.07-4.34,79.53.76,2.36.45,4.75.73,7.76,1.19-1.17-2.19-2-3.91-2.97-5.55-21.15-35.81-21.73-72.66-5.24-110.19,3.46-7.87,7.96-15.3,12.16-22.84,2.05-3.67,5.13-5.96,9.69-5.3,4.81.7,7.42,3.56,8.47,8.23,4.18,18.65,11.79,35.63,24.71,49.94,8.73,9.68,19.39,16.39,31.97,19.92,1.54.43,3.18.52,5.9.95-.93-9.98-1.24-19.36-2.77-28.54-6.14-36.81-21.48-68.93-49.5-94.3-14.78-13.38-31.73-23.24-50.19-30.59-3.88-1.54-7.69-3.25-8.46-7.99-1.06-6.46,2.06-10.63,8.9-11.84,17.22-3.05,34.58-4.51,52.06-3.54,35.29,1.96,68.72,10.57,99.71,28.02,26.75,15.06,48.55,35.57,67.13,59.75,1.57,2.04,3.23,4.01,4.88,5.99.17.21.51.28,1.11.59,1.49-5.1,2.95-10.13,4.43-15.15,12.45-42.29,39.87-70.14,81.4-84.34,2.12-.73,4.39-1.35,6.61-1.4,6.89-.16,11.18,5.96,8.73,12.4-.74,1.94-2.03,3.7-3.25,5.42-19.06,26.79-22.73,55.48-10.74,86.14.22.56.47,1.12.77,1.64.14.25.42.42,1.57,1.51,8.25-7.18,17.24-13.88,24.9-21.87,23.77-24.76,35.01-55.05,37.83-88.91,1.81-21.68-.59-42.98-4.93-64.14-.94-4.57-.5-8.49,3.41-11.39,4.12-3.06,8.27-2.27,12.26.38,47.35,31.42,76.6,74.25,82.51,131.58,1.9,18.39-.54,36.61-3.78,54.71-.69,3.83-1.27,7.69-2.02,12.3,7.06-2.72,13.48-5.23,19.93-7.68,45.25-17.14,86.53-7.65,125.25,18.76,3.28,2.24,5.4,5.45,4.61,9.67-.81,4.31-3.71,6.76-7.89,7.86-16.18,4.26-30.96,11.26-43.79,22.2-12.18,10.39-20.82,23.12-26,38.23-.43,1.24-.6,2.57-1.05,4.58,5.56.78,10.72,1.86,15.93,2.18,37.19,2.27,69.85-9.38,98.4-32.86,20.61-16.95,36.69-37.77,50.19-60.66,2.88-4.88,5.45-10.17,12.54-9.23,6.9.91,8.07,6.63,9.49,11.87,12.6,46.72,6.3,91.02-17.74,132.77-18.97,32.95-45.86,58.41-77.01,79.68-2.08,1.42-4.12,2.89-6.53,4.59,9.14,3.84,17.89,7.24,26.4,11.15,34.33,15.76,57.17,42.07,70.3,77.18,2.03,5.43.94,9.98-2.85,12.68-3.98,2.83-7.66,2.59-12.5-1.06-14.78-11.14-30.84-19.26-49.58-20.91-14.11-1.25-26.52,3.08-37.69,12.08,14.2,19.38,30.04,36.71,50.78,48.97,34.71,20.52,71.36,23.29,109.55,11.93,2.6-.77,5.28-1.42,7.97-1.67,3.72-.35,7.01.96,8.81,4.4,1.82,3.47,1.58,7.17-.87,10.24-3.21,4.02-6.73,7.8-10.22,11.59-36.12,39.08-80.54,62.67-133.21,70.01-19.94,2.78-40.13,4.11-60.31,1.42-1.16-.16-2.37-.02-4.02-.02ZM510.54,717.8c112.57,1.82,214.14-90.69,215.18-212.46,1.04-120.5-95.09-217.72-215.13-218.08-117.42-.36-214.37,95.69-215.55,212.8-1.25,124.34,101.18,219.73,215.49,217.74Z"/>
+  </g>
+
+  <!-- LEFT bamboo stalk — top piece (above gap) -->
+  <rect x="68" y="0" width="52" height="240" fill="url(#stalkL)" rx="4"/>
+  <rect x="68" y="0" width="52" height="240" fill="none" stroke="#1a2e1a" stroke-width="3" rx="4"/>
+  <!-- Node rings left top -->
+  <rect x="68" y="78" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <rect x="68" y="155" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <!-- LEFT bamboo stalk — bottom piece (below gap) -->
+  <rect x="68" y="360" width="52" height="270" fill="url(#stalkL)" rx="4"/>
+  <rect x="68" y="360" width="52" height="270" fill="none" stroke="#1a2e1a" stroke-width="3" rx="4"/>
+  <rect x="68" y="435" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <rect x="68" y="510" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <!-- Leaves left -->
+  <ellipse cx="55" cy="200" rx="36" ry="14" fill="#4a8a40" stroke="#1a2e1a" stroke-width="2" transform="rotate(-35 55 200)"/>
+  <ellipse cx="130" cy="140" rx="36" ry="14" fill="#5cb85c" stroke="#1a2e1a" stroke-width="2" transform="rotate(30 130 140)"/>
+  <ellipse cx="50" cy="440" rx="36" ry="14" fill="#4a8a40" stroke="#1a2e1a" stroke-width="2" transform="rotate(-30 50 440)"/>
+
+  <!-- RIGHT bamboo stalk — top piece -->
+  <rect x="1080" y="0" width="52" height="210" fill="url(#stalkR)" rx="4"/>
+  <rect x="1080" y="0" width="52" height="210" fill="none" stroke="#1a2e1a" stroke-width="3" rx="4"/>
+  <rect x="1080" y="68" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <rect x="1080" y="142" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <!-- RIGHT bamboo stalk — bottom piece -->
+  <rect x="1080" y="330" width="52" height="300" fill="url(#stalkR)" rx="4"/>
+  <rect x="1080" y="330" width="52" height="300" fill="none" stroke="#1a2e1a" stroke-width="3" rx="4"/>
+  <rect x="1080" y="405" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <rect x="1080" y="480" width="52" height="7" fill="#3a6b3a" opacity="0.7"/>
+  <!-- Leaves right -->
+  <ellipse cx="1095" cy="175" rx="36" ry="14" fill="#4a8a40" stroke="#1a2e1a" stroke-width="2" transform="rotate(35 1095 175)"/>
+  <ellipse cx="1140" cy="380" rx="36" ry="14" fill="#5cb85c" stroke="#1a2e1a" stroke-width="2" transform="rotate(-28 1140 380)"/>
+
+  <!-- Speed lines trailing behind character -->
+  <g opacity="0.35" stroke="#ffffff" stroke-linecap="round">
+    <line x1="520" y1="283" x2="380" y2="283" stroke-width="3"/>
+    <line x1="510" y1="298" x2="400" y2="298" stroke-width="2"/>
+    <line x1="515" y1="268" x2="420" y2="268" stroke-width="2"/>
+    <line x1="505" y1="313" x2="430" y2="313" stroke-width="1.5"/>
+    <line x1="500" y1="255" x2="440" y2="255" stroke-width="1.5"/>
+    <line x1="490" y1="325" x2="445" y2="325" stroke-width="1"/>
+  </g>
+
+  <!-- Floating leaves (decorative) -->
+  <!-- Leaf 1 -->
+  <g transform="translate(320,210) rotate(-20)">
+    <path d="M0,-18 Q18,0 0,18 Q-18,0 0,-18 Z" fill="#4a8a40" stroke="#1a2e1a" stroke-width="2"/>
+    <line x1="0" y1="-14" x2="0" y2="14" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+  </g>
+  <!-- Leaf 2 -->
+  <g transform="translate(850,190) rotate(25)">
+    <path d="M0,-18 Q18,0 0,18 Q-18,0 0,-18 Z" fill="#5cb85c" stroke="#1a2e1a" stroke-width="2"/>
+    <line x1="0" y1="-14" x2="0" y2="14" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+  </g>
+  <!-- Leaf 3 -->
+  <g transform="translate(420,400) rotate(-15)">
+    <path d="M0,-14 Q14,0 0,14 Q-14,0 0,-14 Z" fill="#88cc80" stroke="#1a2e1a" stroke-width="2"/>
+  </g>
+  <!-- Leaf 4 -->
+  <g transform="translate(760,390) rotate(30)">
+    <path d="M0,-14 Q14,0 0,14 Q-14,0 0,-14 Z" fill="#4a8a40" stroke="#1a2e1a" stroke-width="2"/>
+  </g>
+
+  <!-- CHARACTER — Tenzo matcha bag with wings -->
+  <!-- Left wing -->
+  <g transform="translate(535,290) rotate(-15)">
+    <path d="M0,0 C-8,-5 -36,-3 -40,12 C-36,26 -8,28 0,16 Z" fill="#00c47a" stroke="#1a2e1a" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M-5,2 Q-20,-1 -30,7" stroke="rgba(255,255,255,0.5)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Right wing -->
+  <g transform="translate(665,290) rotate(15)">
+    <path d="M0,0 C8,-5 36,-3 40,12 C36,26 8,28 0,16 Z" fill="#00c47a" stroke="#1a2e1a" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M5,2 Q20,-1 30,7" stroke="rgba(255,255,255,0.5)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- Bag body -->
+  <rect x="557" y="248" width="86" height="112" fill="#007853" stroke="#1a2e1a" stroke-width="4"/>
+  <!-- Shimmer -->
+  <rect x="557" y="248" width="32" height="56" fill="rgba(255,255,255,0.18)" rx="2"/>
+  <!-- Top seal -->
+  <rect x="557" y="248" width="86" height="16" fill="#005238"/>
+  <rect x="565" y="253" width="70" height="4" fill="rgba(255,255,255,0.2)" rx="2"/>
+  <!-- Bottom seal -->
+  <rect x="557" y="344" width="86" height="16" fill="#005238"/>
+  <!-- Gusset lines -->
+  <line x1="578" y1="265" x2="578" y2="343" stroke="#005238" stroke-width="3" opacity="0.4"/>
+  <line x1="622" y1="265" x2="622" y2="343" stroke="#005238" stroke-width="3" opacity="0.4"/>
+  <!-- TENZO text -->
+  <text x="600" y="306" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="20" fill="white" text-anchor="middle" dominant-baseline="middle" filter="url(#glow)">TENZO</text>
+  <!-- Eyes -->
+  <circle cx="584" cy="328" r="7" fill="rgba(0,40,0,0.75)"/>
+  <circle cx="616" cy="328" r="7" fill="rgba(0,40,0,0.75)"/>
+  <circle cx="586" cy="325" r="2.5" fill="white"/>
+  <circle cx="618" cy="325" r="2.5" fill="white"/>
+  <!-- Happy mouth -->
+  <path d="M585 340 Q600 350 615 340" stroke="rgba(0,40,0,0.75)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+
+  <!-- TENZO FLAPPY title -->
+  <text x="600" y="100" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="96" fill="#a8d878" text-anchor="middle" dominant-baseline="middle" filter="url(#textGlow)" letter-spacing="4">TENZO</text>
+  <text x="600" y="175" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="68" fill="#ffffff" text-anchor="middle" dominant-baseline="middle" filter="url(#textGlow)" letter-spacing="8">FLAPPY</text>
+
+  <!-- Tagline + URL -->
+  <text x="600" y="575" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="rgba(255,255,255,0.75)" text-anchor="middle" dominant-baseline="middle" letter-spacing="3">BETTER EVERY DAY  •  play.tenzotea.co</text>
+</svg>
