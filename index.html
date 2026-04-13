@@ -891,7 +891,7 @@ document.addEventListener('keydown',function(e){if(e.code==='Space'){e.preventDe
 cv.addEventListener('click',flap);
 cv.addEventListener('touchstart',function(e){e.preventDefault();flap();},{passive:false});
 document.getElementById('cw').addEventListener('touchstart',function(e){
-  if(e.target===document.getElementById('startBtn')) return;
+  if(e.target.closest('#ov,#rules-ov')) return;
   e.preventDefault(); flap();
 },{passive:false});
 
