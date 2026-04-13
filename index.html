@@ -550,13 +550,11 @@ function drawBamboo(px,topH,botY,boosted,frame){
   var node= fl?C.offWhite:C.midGreen;
 
   drawBambooStalk(ox,0,topH,pw,C.mintGreen,mid,dark,node);
-  drawBambooTipLeaves(px,topH+5,1);
   if(topH>50)  drawBambooSideLeaves(ox,topH*0.3,-1);
   if(topH>100) drawBambooSideLeaves(ox+pw,topH*0.65,1);
 
   var bh=H-botY;
   drawBambooStalk(ox,botY,bh,pw,C.mintGreen,mid,dark,node);
-  drawBambooTipLeaves(px,botY-5,-1);
   if(bh>50)  drawBambooSideLeaves(ox+pw,botY+bh*0.25,1);
   if(bh>100) drawBambooSideLeaves(ox,botY+bh*0.6,-1);
 }
