@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tenzo Flappy</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  background:#3a6b3a;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;overflow:hidden;touch-action:none;
+  font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+}
+#wrap{width:min(400px,100vw);display:flex;flex-direction:column;align-items:center;gap:8px;}
+#topbar{width:100%;display:flex;justify-content:space-between;align-items:center;padding:0 6px;}
+#logo{color:#fff;font-size:clamp(16px,5vw,24px);font-weight:900;letter-spacing:3px;line-height:1;}
+#logo small{display:block;color:rgba(255,255,255,0.7);font-size:.6em;letter-spacing:3px;font-weight:600;}
+#score-badge{font-size:15px;font-weight:800;color:#fff;
+  background:rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.3);
+  border-radius:20px;padding:5px 14px;letter-spacing:1px;}
+#cw{position:relative;border-radius:16px;overflow:hidden;
+  box-shadow:0 0 0 3px #1a3a1a,0 20px 60px rgba(0,0,0,0.5);}
+canvas{display:block;}
+#bars{width:100%;padding:0 6px;display:flex;flex-direction:column;gap:5px;}
+.bar-row{display:flex;align-items:center;gap:8px;}
+.bar-label{font-size:11px;font-weight:800;letter-spacing:1px;white-space:nowrap;width:72px;color:#fff;}
+.bar-bg{flex:1;height:11px;background:rgba(0,0,0,0.25);border-radius:8px;
+  overflow:hidden;border:2px solid rgba(0,0,0,0.3);}
+.bar-fill{height:100%;width:100%;border-radius:6px;transition:width .08s linear,background .2s;}
+#ebar-fill{background:#5cb85c;}
+#bbar-fill{width:0%;background:#f5dfc0;}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:14px;background:rgba(20,45,20,0.95);border-radius:16px;}
+#ov.hide{display:none;}
+.oh{color:#a8d878;font-size:clamp(28px,9vw,46px);font-weight:900;letter-spacing:2px;
+  text-align:center;line-height:1.1;}
+.op{color:#d8f0d0;font-size:12px;text-align:center;max-width:260px;line-height:2;font-weight:500;}
+.big-n{font-size:68px;font-weight:900;color:#f0e060;line-height:1;}
+.bl{color:#a8d878;font-size:12px;font-weight:700;letter-spacing:2px;}
+.btn{background:#5cb85c;border:none;color:#fff;font-weight:900;font-size:18px;letter-spacing:2px;
+  padding:13px 40px;border-radius:50px;cursor:pointer;border:3px solid #1a6a1a;
+  box-shadow:0 5px 0 #1a5a1a;}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1a5a1a;}
+.hint{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:.9}}
+#lb-section{width:100%;display:none;flex-direction:column;align-items:center;gap:8px;}
+#lb-section.show{display:flex;}
+#name-row{display:flex;gap:8px;width:100%;max-width:280px;}
+#player-name{flex:1;background:rgba(0,0,0,0.3);border:2px solid rgba(255,255,255,0.2);
+  border-radius:24px;color:#fff;font-size:14px;font-weight:700;padding:8px 14px;
+  outline:none;letter-spacing:1px;}
+#player-name::placeholder{color:rgba(255,255,255,0.35);}
+#submit-btn{background:#007853;border:2px solid #005c3e;color:#fff;font-weight:900;
+  font-size:13px;letter-spacing:1px;padding:8px 16px;border-radius:24px;cursor:pointer;
+  white-space:nowrap;}
+#submit-btn:active{opacity:0.8;}
+#submit-msg{font-size:11px;color:#a8d878;font-weight:700;letter-spacing:1px;min-height:16px;}
+#lb-table{width:100%;max-width:280px;}
+#lb-table .lb-title{color:#a8d878;font-size:11px;font-weight:900;letter-spacing:2px;
+  text-align:center;margin-bottom:6px;}
+#lb-table .lb-row{display:flex;align-items:center;gap:6px;padding:4px 0;
+  border-bottom:1px solid rgba(255,255,255,0.07);}
+#lb-table .lb-rank{color:#f0e060;font-size:11px;font-weight:900;width:20px;text-align:center;}
+#lb-table .lb-name{flex:1;color:#d8f0d0;font-size:12px;font-weight:700;letter-spacing:1px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#lb-table .lb-score{color:#f0e060;font-size:12px;font-weight:900;}
+#lb-table .lb-me .lb-name,#lb-table .lb-me .lb-score{color:#fff;}
+#lb-table .lb-me .lb-rank{color:#fff;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="topbar">
+    <div id="logo">TENZO<small>STAY AIRBORNE</small></div>
+    <div id="score-badge">⭐ <span id="sc">0</span> &nbsp;🏆 <span id="hs">0</span></div>
+  </div>
+  <div id="cw">
+    <canvas id="c"></canvas>
+    <div id="ov">
+      <div class="oh" id="oh">TENZO<br>FLAPPY</div>
+      <div class="op" id="op">
+        <div style="text-align:left;line-height:2.1;">
+          👆 <b>Tap</b> to flap &amp; fly<br>
+          ⚡ Energy drains — don't run out!<br>
+          🍃 Grab <b>leaves</b> to recharge<br>
+          🎋 Fly through <b>bamboo</b> gaps<br>
+          🌊 <b>Waterfalls</b> push you down<br>
+          ☕ <b>Coffee clouds</b> weaken your flap<br>
+          🥛 <b>Latte cup</b> = full invincibility!
+        </div>
+      </div>
+      <div class="big-n" id="fn" style="display:none"></div>
+      <div class="bl"    id="fb" style="display:none"></div>
+      <div id="lb-section">
+        <div id="name-row">
+          <input id="player-name" type="text" maxlength="16" placeholder="Your name" autocomplete="off" spellcheck="false">
+          <button id="submit-btn">POST</button>
+        </div>
+        <div id="submit-msg"></div>
+        <div id="lb-table">
+          <div class="lb-title">🏆 LEADERBOARD</div>
+          <div id="lb-rows"></div>
+        </div>
+      </div>
+      <button class="btn" id="startBtn">LET'S FLY</button>
+      <div class="hint">TAP ANYWHERE TO FLAP</div>
+    </div>
+  </div>
+  <div id="bars">
+    <div class="bar-row">
+      <div class="bar-label">⚡ ENERGY</div>
+      <div class="bar-bg"><div class="bar-fill" id="ebar-fill"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">☕ LATTE</div>
+      <div class="bar-bg"><div class="bar-fill" id="bbar-fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+var cv  = document.getElementById('c');
+var ctx = cv.getContext('2d');
+var W, H;
+function resize(){
+  W = Math.min(400, window.innerWidth);
+  H = Math.round(W * 1.35);
+  cv.width = W; cv.height = H;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── TENZO BRAND PALETTE (from booth illustration) ────────────────────────
+var C = {
+  // Greens — layered like the illustration
+  darkGreen:  '#2a4a2a',  // darkest outline/shadow
+  midGreen:   '#3a6b3a',  // mid background green
+  leafGreen:  '#4a8a40',  // main leaf/stalk green
+  brightGreen:'#5cb85c',  // highlight green
+  mintGreen:  '#88cc80',  // lightest green / highlight
+  sageGreen:  '#6b9b60',  // sage mid tone
+  // Whites & creams
+  white:      '#ffffff',
+  offWhite:   '#e8f5e0',  // white with green tint like illustration
+  // Outline
+  outline:    '#1a2e1a',  // thick dark outline colour
+  // Accent
+  yellow:     '#f0e060',
+  red:        '#c0392b',
+  latte:      '#d4b896',
+  latteLight: '#f5e8d8',
+  // Sky
+  skyLight:   '#b8d8b0',
+  skyMid:     '#8ab888',
+};
+
+var GRAVITY    = 0.62;
+var FLAP       = -5.8;
+var PIPE_SPD   = 2.6;
+var GAP        = 175;
+var E_DRAIN    = 0.0016;
+var E_LEAF     = 0.28;
+var BOOST_GRAV = 0.05;
+var BOOST_DRN  = 0.005;
+var G = null, raf = null, hi = 0;
+
+// ── DRAW HELPERS ─────────────────────────────────────────────────────────
+// Thick outlined shape — Tenzo illustration style
+function filled(color, outlineColor, outlineW){
+  ctx.fillStyle = color; ctx.fill();
+  if(outlineColor){
+    ctx.strokeStyle = outlineColor;
+    ctx.lineWidth = outlineW || 2.5;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+}
+function rrect(x,y,w,h,r,fc,sc,lw){
+  lw=lw||2.5;
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+  filled(fc,sc,lw);
+}
+function ell(x,y,rx,ry,fc,sc,lw){
+  lw=lw||2.5;
+  ctx.beginPath(); ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);
+  filled(fc,sc,lw);
+}
+function lne(x1,y1,x2,y2,c,lw){
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+  ctx.strokeStyle=c; ctx.lineWidth=lw||2.5; ctx.lineCap='round'; ctx.stroke();
+}
+function stxt(s,x,y,size,bold,color){
+  ctx.font=(bold?'bold ':'')+size+'px -apple-system,sans-serif';
+  ctx.fillStyle=color; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(s,x,y);
+}
+function circleRect(cx2,cy2,cr,rx,ry,rw,rh){
+  var nx=Math.max(rx,Math.min(cx2,rx+rw));
+  var ny=Math.max(ry,Math.min(cy2,ry+rh));
+  var dx=cx2-nx,dy=cy2-ny;
+  return dx*dx+dy*dy<cr*cr;
+}
+
+// ── BACKGROUND ───────────────────────────────────────────────────────────
+function drawBG(frame, boosted){
+  // Sky — flat Tenzo sage green like illustration background
+  ctx.fillStyle = boosted ? '#c8a870' : C.skyLight;
+  ctx.fillRect(0,0,W,H);
+
+  // Rolling hills — layered flat shapes like the illustration
+  // Far hill
+  ctx.fillStyle = C.midGreen;
+  ctx.beginPath(); ctx.moveTo(0,H*0.55);
+  ctx.quadraticCurveTo(W*0.25,H*0.38, W*0.5,H*0.48);
+  ctx.quadraticCurveTo(W*0.75,H*0.58, W,H*0.44);
+  ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+
+  // Mid hill
+  ctx.fillStyle = C.leafGreen;
+  ctx.beginPath(); ctx.moveTo(0,H*0.68);
+  ctx.quadraticCurveTo(W*0.2,H*0.55, W*0.45,H*0.63);
+  ctx.quadraticCurveTo(W*0.7,H*0.72, W,H*0.60);
+  ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+
+  // Near ground
+  ctx.fillStyle = C.darkGreen;
+  ctx.fillRect(0, H*0.82, W, H*0.18);
+
+  // Ground highlight line — white like illustration
+  ctx.fillStyle = C.offWhite;
+  ctx.fillRect(0, H*0.82, W, 4);
+
+  // Outline on hills
+  ctx.strokeStyle = C.outline; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(0,H*0.68);
+  ctx.quadraticCurveTo(W*0.2,H*0.55,W*0.45,H*0.63);
+  ctx.quadraticCurveTo(W*0.7,H*0.72,W,H*0.60);
+  ctx.stroke();
+
+  // Scrolling white line highlights on hills (like illustration parallel lines)
+  var offset = (frame*1.2)%80;
+  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=2;
+  for(var hi2=0;hi2<3;hi2++){
+    var lx = -80 + ((offset + hi2*28)%(W+80));
+    ctx.beginPath();
+    ctx.moveTo(lx, H*0.68);
+    ctx.quadraticCurveTo(lx+W*0.2, H*0.62, lx+W*0.5, H*0.66);
+    ctx.stroke();
+  }
+}
+
+// ── TENZO CAN + WINGS (flat bold illustration style) ─────────────────────
+function drawCan(bx,by,angle,wFlap,energy,boosted,frame,coffeed,inGrace){
+  ctx.save();
+  ctx.translate(bx,by); ctx.rotate(angle);
+
+  var cw=40,ch=52,hcw=20,hch=26;
+  var lowE = energy<0.25;
+
+  // Wing colour cycling for boost
+  var wColor;
+  if(boosted){ var cy2=frame%18; wColor=cy2<6?C.yellow:cy2<12?C.latte:C.offWhite; }
+  else if(coffeed){ wColor='#8b4513'; }
+  else if(inGrace){ wColor=C.latte; }
+  else { wColor = lowE?C.red:C.brightGreen; }
+
+  // Boost expanding ring
+  if(boosted){
+    ctx.save();
+    var ring=(frame*3)%40;
+    ctx.strokeStyle=C.yellow; ctx.lineWidth=3;
+    ctx.globalAlpha=(40-ring)/40*0.6;
+    ctx.beginPath(); ctx.ellipse(0,0,hcw+ring,hch+ring*0.5,0,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Wings — flat bold leaf-like shapes
+  var sides=[-1,1];
+  for(var wi=0;wi<2;wi++){
+    var sd=sides[wi];
+    ctx.save();
+    ctx.translate(sd*hcw, 6); ctx.rotate(-sd*wFlap);
+    // Wing shape — like a leaf from the illustration
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.bezierCurveTo(sd*8,-4, sd*28,-2, sd*30,12);
+    ctx.bezierCurveTo(sd*28,22, sd*10,24, 0,14);
+    ctx.closePath();
+    ctx.fillStyle=wColor; ctx.fill();
+    ctx.strokeStyle=C.outline; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+    // White highlight stripe like illustration
+    ctx.beginPath();
+    ctx.moveTo(sd*4,2);
+    ctx.quadraticCurveTo(sd*16,0, sd*22,8);
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.restore();
+  }
+
+  // Can body — bold flat white with thick outline
+  ctx.beginPath();
+  ctx.moveTo(-hcw+4,-hch); ctx.lineTo(hcw-4,-hch);
+  ctx.arcTo(hcw,-hch,hcw,-hch+4,4);
+  ctx.lineTo(hcw,hch-4); ctx.arcTo(hcw,hch,hcw-4,hch,4);
+  ctx.lineTo(-hcw+4,hch); ctx.arcTo(-hcw,hch,-hcw,hch-4,4);
+  ctx.lineTo(-hcw,-hch+4); ctx.arcTo(-hcw,-hch,-hcw+4,-hch,4);
+  ctx.closePath();
+  ctx.fillStyle = C.white; ctx.fill();
+  ctx.strokeStyle=C.outline; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.stroke();
+
+  // Boost/grace colour tint on can
+  if(boosted||inGrace){
+    ctx.save(); ctx.globalAlpha=inGrace?0.15:0.2;
+    ctx.fillStyle=inGrace?C.latte:C.yellow;
+    ctx.fill(); // reuses last path
+    ctx.restore();
+  }
+
+  // Green top band — bold flat colour
+  ctx.fillStyle=C.leafGreen;
+  ctx.fillRect(-hcw+1,-hch+1,cw-2,14);
+  // White stripe on band like illustration
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillRect(-hcw+4,-hch+2,cw-8,5);
+  stxt('ORGANIC MATCHA',0,-hch+8,4.5,true,C.white);
+
+  // Label area
+  ctx.fillStyle=C.offWhite; ctx.fillRect(-hcw+1,-hch+15,cw-2,22);
+  stxt('TENZO',0,-hch+25,14,true,C.outline);
+
+  // Leaf icon — bold flat like illustration
+  ctx.beginPath();
+  ctx.moveTo(0,-hch+33);
+  ctx.quadraticCurveTo(7,-hch+27,0,-hch+40);
+  ctx.quadraticCurveTo(-7,-hch+27,0,-hch+33);
+  ctx.fillStyle=C.leafGreen; ctx.fill();
+  ctx.strokeStyle=C.outline; ctx.lineWidth=1.5; ctx.stroke();
+  lne(0,-hch+27,0,-hch+40,C.outline,1);
+
+  // Bottom green band
+  ctx.fillStyle=C.leafGreen;
+  ctx.fillRect(-hcw+1,-hch+37,cw-2,11);
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillRect(-hcw+4,-hch+38,cw-8,3);
+  stxt('CEREMONIAL GRADE',0,-hch+42,4,false,C.white);
+
+  // Pull tab
+  ctx.beginPath(); ctx.moveTo(-4,-hch); ctx.quadraticCurveTo(0,-hch-8,6,-hch-2);
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.stroke();
+  ell(6,-hch-2,2.5,2.5,'#bbb',C.outline,1.5);
+
+  // Face
+  var fy=hch-10;
+  ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle=C.outline;
+  if(boosted){
+    // Sunglasses — flat bold shapes
+    rrect(-13,fy-6,10,8,3,C.outline,null);
+    rrect(3,fy-6,10,8,3,C.outline,null);
+    lne(-3,fy-3,3,fy-3,C.outline,2);
+    ctx.fillStyle='rgba(255,255,255,0.25)';
+    ctx.fillRect(-11,fy-4,3,3); ctx.fillRect(5,fy-4,3,3);
+    ctx.beginPath(); ctx.moveTo(-9,fy+4); ctx.quadraticCurveTo(0,fy+11,9,fy+4); ctx.stroke();
+  } else if(inGrace){
+    // Calm, relieved face
+    ell(-8,fy-2,3,3,C.outline,null);
+    ell(8,fy-2,3,3,C.outline,null);
+    ctx.beginPath(); ctx.moveTo(-7,fy+5); ctx.quadraticCurveTo(0,fy+9,7,fy+5); ctx.stroke();
+  } else if(lowE){
+    lne(-11,fy-6,-7,fy-2,C.red,2.5); lne(-7,fy-6,-11,fy-2,C.red,2.5);
+    lne(7,fy-6,11,fy-2,C.red,2.5);  lne(11,fy-6,7,fy-2,C.red,2.5);
+    ctx.beginPath(); ctx.moveTo(-7,fy); ctx.quadraticCurveTo(0,fy-3,7,fy); ctx.stroke();
+  } else if(coffeed){
+    lne(-11,fy-5,-7,fy-3,'#8b4513',2); lne(-7,fy-5,-11,fy-3,'#8b4513',2);
+    lne(7,fy-5,11,fy-3,'#8b4513',2); lne(11,fy-5,7,fy-3,'#8b4513',2);
+    ctx.beginPath(); ctx.moveTo(-7,fy+3); ctx.quadraticCurveTo(0,fy,7,fy+3); ctx.stroke();
+  } else {
+    ctx.fillStyle=C.outline;
+    ctx.fillRect(-11,fy-6,7,3); ctx.fillRect(4,fy-6,7,3);
+    ell(-8,fy,3,3,C.outline,null);
+    ell(8,fy,3,3,C.outline,null);
+    ctx.beginPath(); ctx.moveTo(-7,fy+5); ctx.quadraticCurveTo(0,fy+9,7,fy+5); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── BAMBOO (flat bold illustration style) ────────────────────────────────
+function drawBambooStalk(ox,clipY,clipH,pw,light,mid,dark,node){
+  ctx.save();
+  ctx.beginPath(); ctx.rect(ox,clipY,pw,clipH); ctx.clip();
+  var segH=36;
+  var segs=Math.ceil(clipH/segH)+2;
+  for(var s=0;s<segs;s++){
+    var sy=clipY+s*segH;
+    // Segment — flat colour with white highlight stripe like illustration
+    ctx.fillStyle=mid; ctx.fillRect(ox,sy,pw,segH-4);
+    // Left shadow
+    ctx.fillStyle=dark; ctx.fillRect(ox,sy,5,segH-4);
+    // Right shadow
+    ctx.fillStyle=dark; ctx.fillRect(ox+pw-5,sy,5,segH-4);
+    // White highlight stripe
+    ctx.fillStyle='rgba(255,255,255,0.35)';
+    ctx.fillRect(ox+7,sy+3,pw-14,5);
+    // Node band
+    ctx.fillStyle=node; ctx.fillRect(ox-3,sy+segH-4,pw+6,7);
+    ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillRect(ox-1,sy+segH-3,pw+2,3);
+    // Node outline
+    ctx.strokeStyle=C.outline; ctx.lineWidth=1.5;
+    ctx.strokeRect(ox-3,sy+segH-4,pw+6,7);
+  }
+  // Outer outline
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2.5;
+  ctx.strokeRect(ox,clipY,pw,clipH);
+  ctx.restore();
+}
+
+function drawBambooSideLeaves(lx,ly,side){
+  var lcs=[C.leafGreen, C.brightGreen, C.sageGreen];
+  for(var i=0;i<3;i++){
+    ctx.save(); ctx.translate(lx,ly); ctx.rotate(side*(0.25+i*0.3));
+    ctx.beginPath(); ctx.moveTo(0,0);
+    ctx.bezierCurveTo(4,-5,16+i*4,-11+i*2,22+i*4,-3+i*2);
+    ctx.bezierCurveTo(16+i*3,0,4,2,0,0);
+    ctx.fillStyle=lcs[i]; ctx.fill();
+    ctx.strokeStyle=C.outline; ctx.lineWidth=1.8; ctx.stroke();
+    // Vein
+    lne(0,0,18+i*3,-4+i,C.outline,0.8);
+    ctx.restore();
+  }
+}
+
+function drawBambooTipLeaves(tx,ty,dir){
+  var angles=[-0.75,-0.38,0,0.38,0.75];
+  var lengths=[22,28,32,28,22];
+  var lcs=[C.sageGreen,C.leafGreen,C.brightGreen,C.leafGreen,C.sageGreen];
+  for(var i=0;i<5;i++){
+    ctx.save(); ctx.translate(tx,ty); ctx.rotate(angles[i]);
+    var len=lengths[i];
+    ctx.beginPath(); ctx.moveTo(0,0);
+    ctx.bezierCurveTo(5*dir,len*0.25*dir, 9*dir,len*0.65*dir, 3*dir,len*dir);
+    ctx.bezierCurveTo(-3*dir,len*0.8*dir, -6*dir,len*0.3*dir, 0,0);
+    ctx.fillStyle=lcs[i]; ctx.fill();
+    ctx.strokeStyle=C.outline; ctx.lineWidth=2; ctx.stroke();
+    // White highlight on leaf
+    ctx.beginPath();
+    ctx.moveTo(1*dir,len*0.1*dir);
+    ctx.quadraticCurveTo(4*dir,len*0.4*dir, 2*dir,len*0.7*dir);
+    ctx.strokeStyle='rgba(255,255,255,0.4)'; ctx.lineWidth=1.5; ctx.stroke();
+    // Vein
+    lne(0,0,2*dir,len*0.85*dir,C.outline,0.8);
+    ctx.restore();
+  }
+}
+
+function drawBambooCutEnd(ox,y,pw){
+  ctx.fillStyle=C.darkGreen;
+  ctx.fillRect(ox-2,y-4,pw+4,6);
+  // Hollow inner
+  ctx.fillStyle='rgba(0,0,0,0.4)';
+  ctx.fillRect(ox+4,y-2,pw-8,4);
+  // White edge highlight
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillRect(ox-1,y-4,pw+2,2);
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2;
+  ctx.strokeRect(ox-2,y-4,pw+4,6);
+}
+
+function drawBamboo(px,topH,botY,boosted,frame){
+  var pw=28,hpw=14,ox=px-hpw;
+  var fl=boosted&&frame%8<4;
+  var mid = fl?C.mintGreen:C.leafGreen;
+  var dark= fl?C.brightGreen:C.sageGreen;
+  var node= fl?C.offWhite:C.midGreen;
+
+  drawBambooStalk(ox,0,topH,pw,C.mintGreen,mid,dark,node);
+  drawBambooCutEnd(ox,topH,pw);
+  drawBambooTipLeaves(px,topH+5,1);
+  if(topH>50)  drawBambooSideLeaves(ox,topH*0.3,-1);
+  if(topH>100) drawBambooSideLeaves(ox+pw,topH*0.65,1);
+
+  var bh=H-botY;
+  drawBambooStalk(ox,botY,bh,pw,C.mintGreen,mid,dark,node);
+  drawBambooCutEnd(ox,botY,pw);
+  drawBambooTipLeaves(px,botY-5,-1);
+  if(bh>50)  drawBambooSideLeaves(ox+pw,botY+bh*0.25,1);
+  if(bh>100) drawBambooSideLeaves(ox,botY+bh*0.6,-1);
+}
+
+// ── WATERFALL (flat illustration style) ──────────────────────────────────
+function drawWaterfall(wx,ww,wh,frame){
+  var ox=wx-ww/2;
+  // Rock ledge — flat grey shapes with outline
+  ctx.fillStyle='#7a7060'; ctx.fillRect(ox-5,0,ww+10,14);
+  ctx.fillStyle='#9a9080'; ctx.fillRect(ox-3,0,ww+6,9);
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillRect(ox,0,ww,4);
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2.5;
+  ctx.strokeRect(ox-5,0,ww+10,14);
+  // Moss on ledge
+  ctx.fillStyle=C.leafGreen; ctx.fillRect(ox,0,ww,5);
+
+  // Water — flat bold blue-white stripes like illustration
+  ctx.fillStyle='rgba(200,235,255,0.7)';
+  ctx.fillRect(ox,14,ww,wh-14);
+  // Parallel animated lines — exactly like illustration style
+  var off=(frame*4)%20;
+  ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=2;
+  ctx.save(); ctx.beginPath(); ctx.rect(ox,14,ww,wh-14); ctx.clip();
+  for(var s=0;s<8;s++){
+    var sy=14+((off+s*18)%(wh-14+20))-10;
+    ctx.beginPath(); ctx.moveTo(ox+2,sy); ctx.lineTo(ox+ww-2,sy+4); ctx.stroke();
+  }
+  ctx.restore();
+  // Side outlines on water
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2;
+  ctx.strokeRect(ox,14,ww,wh-14);
+  // Mist at bottom — soft circle
+  ctx.save(); ctx.globalAlpha=0.25+0.1*Math.sin(frame*0.1);
+  ctx.fillStyle='rgba(220,240,255,0.8)';
+  ctx.beginPath(); ctx.ellipse(wx,wh,ww*0.8,10,0,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+// ── COFFEE CLOUD (flat bold style) ───────────────────────────────────────
+function drawCoffeeCloud(ox,oy,rad,frame,active){
+  ctx.save(); ctx.translate(ox,oy);
+  var pulse=1+Math.sin(frame*0.08)*0.05;
+  ctx.scale(pulse,pulse);
+
+  var fill=active?'#6b2800':'#7a4830';
+  var hi2=active?'#9a4010':'#9a6040';
+
+  // Cloud — 3 bold flat circles
+  var clumpX=[-14,0,14], clumpY=[5,0,5], clumpR=[13,15,12];
+  for(var i=0;i<3;i++){
+    ctx.beginPath(); ctx.arc(clumpX[i],clumpY[i],clumpR[i],0,Math.PI*2);
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.strokeStyle=C.outline; ctx.lineWidth=2.5; ctx.stroke();
+  }
+  // Highlight arcs on top of each cloud puff
+  for(var j=0;j<3;j++){
+    ctx.beginPath(); ctx.arc(clumpX[j],clumpY[j]-2,clumpR[j]*0.65,Math.PI,Math.PI*2);
+    ctx.fillStyle=hi2; ctx.fill();
+  }
+  // White highlight on cloud
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.arc(-12,-2,5,Math.PI,Math.PI*2); ctx.fill();
+
+  // Steam wisps — bold curves
+  ctx.strokeStyle='rgba(200,150,80,0.6)'; ctx.lineWidth=2; ctx.lineCap='round';
+  for(var w2=0;w2<3;w2++){
+    var wx2=-8+w2*8, woff=(frame*2+w2*20)%28;
+    ctx.globalAlpha=0.5*(1-woff/28);
+    ctx.beginPath(); ctx.moveTo(wx2,-14-woff);
+    ctx.quadraticCurveTo(wx2+5,-20-woff,wx2,-26-woff); ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  stxt('COFFEE',0,3,8,true,'rgba(255,220,180,0.95)');
+
+  if(active){
+    ctx.globalAlpha=0.5+0.4*Math.sin(frame*0.25);
+    ctx.strokeStyle=C.red; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(0,0,rad+5,0,Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// ── MATCHA LEAF (flat bold illustration style) ────────────────────────────
+function drawLeaf(lx,ly,t){
+  ctx.save();
+  var sc=1+Math.sin(t*2)*0.08;
+  ctx.translate(lx,ly); ctx.scale(sc,sc);
+  // Leaf body — bold flat shape with thick outline
+  ctx.beginPath();
+  ctx.moveTo(0,-15); ctx.quadraticCurveTo(15,0,0,15); ctx.quadraticCurveTo(-15,0,0,-15);
+  ctx.fillStyle=C.leafGreen; ctx.fill();
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2.5; ctx.stroke();
+  // White vein highlights like illustration
+  ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,-12); ctx.lineTo(0,12); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,-4); ctx.quadraticCurveTo(8,-8,10,-6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,3); ctx.quadraticCurveTo(-8,-1,-10,1); ctx.stroke();
+  // Yellow star accent
+  ctx.fillStyle=C.yellow; ctx.font='10px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('✦',12,-10);
+  ctx.restore();
+}
+
+// ── LATTE CUP (flat bold illustration style) ──────────────────────────────
+function drawLatte(lx,ly,t){
+  ctx.save();
+  ctx.translate(lx,ly+Math.sin(t*1.5)*5);
+  // Cup body — bold flat white trapezoid
+  ctx.beginPath();
+  ctx.moveTo(-14,0); ctx.lineTo(14,0); ctx.lineTo(16,32); ctx.lineTo(-16,32);
+  ctx.closePath();
+  ctx.fillStyle=C.white; ctx.fill();
+  ctx.strokeStyle=C.outline; ctx.lineWidth=2.5; ctx.stroke();
+  // Foam — bold flat ellipse
+  ell(0,2,14,5.5,C.offWhite,C.outline,2);
+  // Latte art — white swirl shape like illustration
+  ctx.fillStyle='rgba(200,180,160,0.6)';
+  ctx.beginPath(); ctx.moveTo(0,6);
+  ctx.bezierCurveTo(-7,1,-11,5,-7,9); ctx.lineTo(0,14); ctx.lineTo(7,9);
+  ctx.bezierCurveTo(11,5,7,1,0,6); ctx.fill();
+  // Tenzo green band
+  ctx.fillStyle=C.leafGreen; ctx.fillRect(-14,15,28,9);
+  ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.fillRect(-12,16,24,4);
+  stxt('TENZO',0,19,5.5,true,C.white);
+  // Handle — bold flat arc
+  ctx.beginPath(); ctx.moveTo(14,10); ctx.quadraticCurveTo(24,16,14,22);
+  ctx.strokeStyle=C.outline; ctx.lineWidth=5; ctx.lineCap='round'; ctx.stroke();
+  ctx.strokeStyle=C.white; ctx.lineWidth=2.5; ctx.stroke();
+  // Sparkles
+  ctx.fillStyle=C.brightGreen; ctx.font='12px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.globalAlpha=0.8+0.2*Math.sin(t*3);
+  ctx.fillText('✦',-20,-5); ctx.fillText('✦',19,-6);
+  ctx.globalAlpha=1;
+  // INVINCIBLE label
+  ctx.font='bold 7px -apple-system,sans-serif';
+  ctx.fillStyle=C.brightGreen;
+  ctx.globalAlpha=0.9; stxt('INVINCIBLE!',0,-15,7,true,C.brightGreen);
+  ctx.globalAlpha=1;
+  ctx.restore();
+}
+
+// ── TRAIL ─────────────────────────────────────────────────────────────────
+function drawTrail(trail,boosted,frame){
+  if(trail.length<2) return;
+  ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round';
+  var cy2=frame%18;
+  ctx.strokeStyle=boosted?(cy2<6?C.yellow:cy2<12?C.latte:C.offWhite):C.mintGreen;
+  ctx.lineWidth=boosted?5:2.5; ctx.globalAlpha=boosted?0.5:0.3;
+  ctx.beginPath(); ctx.moveTo(trail[0].x,trail[0].y);
+  for(var i=1;i<trail.length;i++){
+    var p=trail[i-1],q=trail[i];
+    ctx.quadraticCurveTo(p.x,p.y,(p.x+q.x)/2,(p.y+q.y)/2);
+  }
+  ctx.stroke(); ctx.restore();
+}
+
+// ── PARTICLES ─────────────────────────────────────────────────────────────
+function burst(bx,by,color,n){
+  n=n||8;
+  for(var i=0;i<n;i++){
+    G.parts.push({x:bx,y:by,vx:(Math.random()-.5)*5,vy:-(Math.random()*3+1),
+      life:1,size:Math.random()*6+3,color:color});
+  }
+}
+function drawParts(){
+  ctx.save();
+  for(var i=G.parts.length-1;i>=0;i--){
+    var p=G.parts[i];
+    ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+    // Flat circle with outline like illustration
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle=C.outline; ctx.lineWidth=1;
+    ctx.stroke();
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.18; p.life-=0.04;
+    if(p.life<=0) G.parts.splice(i,1);
+  }
+  ctx.restore();
+}
+
+// ── GAME STATE ────────────────────────────────────────────────────────────
+function newGame(){
+  resize();
+  return {
+    frame:0,state:'running',score:0,
+    bird:{x:W*0.22,y:H*0.4,vy:0,angle:0,wFlap:0,wDir:1},
+    energy:1,booster:0,boosted:false,coffeePenalty:0,gracePeriod:0,
+    trail:[],
+    pipes:[],nextPipe:100,
+    leaves:[],nextLeaf:55,
+    lattes:[],nextLatte:200,
+    falls:[],nextFall:180,
+    coffees:[],nextCoffee:240,
+    parts:[],flashT:0,latteFlashT:0,
+    speed:PIPE_SPD
+  };
+}
+
+// ── INPUT ─────────────────────────────────────────────────────────────────
+function flap(){
+  if(!G||G.state==='dead') return;
+  var str=G.boosted?FLAP*0.4:FLAP;
+  if(G.coffeePenalty>0) str=str*0.4;
+  G.bird.vy=str;
+  var col=G.coffeePenalty>0?'#8b4513':G.boosted?C.yellow:C.brightGreen;
+  burst(G.bird.x-8,G.bird.y,col,5);
+}
+document.getElementById('startBtn').addEventListener('click',function(e){e.stopPropagation();startGame();});
+document.addEventListener('keydown',function(e){if(e.code==='Space'){e.preventDefault();flap();}});
+cv.addEventListener('click',flap);
+cv.addEventListener('touchstart',function(e){e.preventDefault();flap();},{passive:false});
+document.getElementById('cw').addEventListener('touchstart',function(e){
+  if(e.target===document.getElementById('startBtn')) return;
+  e.preventDefault(); flap();
+},{passive:false});
+
+// ── UPDATE ────────────────────────────────────────────────────────────────
+function update(){
+  var b=G.bird;
+  G.frame++;
+  G.coffeePenalty=Math.max(0,G.coffeePenalty-1);
+  G.gracePeriod=Math.max(0,G.gracePeriod-1);
+  var inGrace=G.gracePeriod>0;
+
+  if(!G.boosted&&!inGrace){
+    G.energy=Math.max(0,G.energy-E_DRAIN);
+    if(G.energy<=0){die('OUT OF ENERGY!','Grab those green leaves!');return;}
+  }
+  if(G.boosted){
+    G.booster=Math.max(0,G.booster-BOOST_DRN);
+    if(G.booster<=0){
+      G.boosted=false;
+      b.vy=Math.max(-2,Math.min(2,b.vy*0.3));
+      G.gracePeriod=60;
+    }
+  }
+
+  var grav=G.boosted?BOOST_GRAV:GRAVITY;
+  b.vy+=grav; if(b.vy>10) b.vy=10; b.y+=b.vy;
+  var maxT=G.boosted?Math.PI/14:Math.PI/3;
+  b.angle+=(Math.min(maxT,b.vy*(G.boosted?0.01:0.055))-b.angle)*(G.boosted?0.04:0.12);
+  b.wFlap+=b.wDir*(G.boosted?0.3:0.2);
+  if(b.wFlap>0.65)b.wDir=-1; if(b.wFlap<-0.1)b.wDir=1;
+  G.trail.push({x:b.x,y:b.y}); if(G.trail.length>30)G.trail.shift();
+
+  if(!G.boosted&&!inGrace){
+    if(b.y>H-38||b.y<8){die('CRASH!','Watch the floor and ceiling!');return;}
+  } else {
+    if(b.y>H-38){b.y=H-38;b.vy=-2;} if(b.y<8){b.y=8;b.vy=2;}
+  }
+
+  G.score=Math.floor(G.frame/10);
+  G.speed=PIPE_SPD+Math.floor(G.score/20)*0.2;
+
+  // Bamboo pipes
+  G.nextPipe--;
+  if(G.nextPipe<=0){
+    var tH=60+Math.random()*(H-GAP-130);
+    G.pipes.push({x:W+60,topH:tH,botY:tH+GAP});
+    G.nextPipe=Math.max(90,120-Math.floor(G.score/12)*3);
+  }
+  for(var i=G.pipes.length-1;i>=0;i--){
+    var p=G.pipes[i]; p.x-=G.speed;
+    if(p.x<-80){G.pipes.splice(i,1);continue;}
+    if(G.boosted||inGrace) continue;
+    if(circleRect(b.x,b.y,13,p.x-14,0,28,p.topH)){die('HIT BAMBOO!','Squeeze through the gap!');return;}
+    if(circleRect(b.x,b.y,13,p.x-14,p.botY,28,H-p.botY)){die('HIT BAMBOO!','Squeeze through the gap!');return;}
+  }
+
+  // Leaves
+  G.nextLeaf--;
+  if(G.nextLeaf<=0){
+    G.leaves.push({x:W+30,y:60+Math.random()*(H-160),t:Math.random()*6.28});
+    G.nextLeaf=Math.max(35,50+Math.random()*40);
+  }
+  for(var j=G.leaves.length-1;j>=0;j--){
+    var lf=G.leaves[j]; lf.x-=G.speed*0.85; lf.t+=0.05;
+    if(lf.x<-40){G.leaves.splice(j,1);continue;}
+    var dx=b.x-lf.x,dy=b.y-lf.y;
+    if(dx*dx+dy*dy<24*24){
+      G.energy=Math.min(1,G.energy+E_LEAF);
+      burst(lf.x,lf.y,C.yellow,10); G.flashT=16; G.leaves.splice(j,1);
+    }
+  }
+
+  // Latte boosters
+  G.nextLatte--;
+  if(G.nextLatte<=0){
+    G.lattes.push({x:W+30,y:80+Math.random()*(H-200),t:Math.random()*6.28});
+    G.nextLatte=Math.max(160,220+Math.random()*100);
+  }
+  for(var k=G.lattes.length-1;k>=0;k--){
+    var lt=G.lattes[k]; lt.x-=G.speed*0.8; lt.t+=0.04;
+    if(lt.x<-40){G.lattes.splice(k,1);continue;}
+    var ldx=b.x-lt.x,ldy=b.y-lt.y;
+    if(ldx*ldx+ldy*ldy<28*28){
+      G.booster=1; G.boosted=true;
+      b.vy=Math.max(-1.5,Math.min(1.5,b.vy*0.2));
+      burst(lt.x,lt.y,C.yellow,20); burst(lt.x,lt.y,C.latte,14);
+      G.latteFlashT=35; G.lattes.splice(k,1);
+    }
+  }
+
+  // Waterfalls
+  G.nextFall--;
+  if(G.nextFall<=0){
+    G.falls.push({x:W+60,ww:30+Math.random()*20,wh:H*0.25+Math.random()*H*0.3});
+    G.nextFall=Math.max(150,210+Math.random()*100);
+  }
+  for(var wi=G.falls.length-1;wi>=0;wi--){
+    var wf=G.falls[wi]; wf.x-=G.speed*0.85;
+    if(wf.x<-60){G.falls.splice(wi,1);continue;}
+    if(!G.boosted&&!inGrace&&b.x>wf.x-wf.ww/2-8&&b.x<wf.x+wf.ww/2+8&&b.y<wf.wh){
+      b.vy+=2.8; burst(b.x,b.y,'rgba(180,230,255,0.9)',3);
+    }
+  }
+
+  // Coffee clouds
+  G.nextCoffee--;
+  if(G.nextCoffee<=0){
+    G.coffees.push({x:W+50,y:H*0.15+Math.random()*H*0.6,r:22+Math.random()*10,active:false});
+    G.nextCoffee=Math.max(180,250+Math.random()*120);
+  }
+  for(var ci=G.coffees.length-1;ci>=0;ci--){
+    var co=G.coffees[ci]; co.x-=G.speed*0.75; co.active=false;
+    if(co.x<-60){G.coffees.splice(ci,1);continue;}
+    if(!G.boosted&&!inGrace){
+      var cdx=b.x-co.x,cdy=b.y-co.y;
+      if(cdx*cdx+cdy*cdy<(co.r+12)*(co.r+12)){co.active=true;G.coffeePenalty=90;}
+    }
+  }
+  G.flashT=Math.max(0,G.flashT-1);
+  G.latteFlashT=Math.max(0,G.latteFlashT-1);
+}
+
+// ── DRAW ─────────────────────────────────────────────────────────────────
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  var inGrace=G.gracePeriod>0;
+  drawBG(G.frame,G.boosted);
+
+  for(var i=0;i<G.pipes.length;i++)
+    drawBamboo(G.pipes[i].x,G.pipes[i].topH,G.pipes[i].botY,G.boosted,G.frame);
+  for(var wi=0;wi<G.falls.length;wi++)
+    drawWaterfall(G.falls[wi].x,G.falls[wi].ww,G.falls[wi].wh,G.frame);
+  for(var ci=0;ci<G.coffees.length;ci++)
+    drawCoffeeCloud(G.coffees[ci].x,G.coffees[ci].y,G.coffees[ci].r,G.frame,G.coffees[ci].active);
+  for(var j=0;j<G.leaves.length;j++)
+    drawLeaf(G.leaves[j].x,G.leaves[j].y,G.leaves[j].t);
+  for(var k=0;k<G.lattes.length;k++)
+    drawLatte(G.lattes[k].x,G.lattes[k].y,G.lattes[k].t);
+
+  drawParts();
+  drawTrail(G.trail,G.boosted,G.frame);
+
+  // Flashes
+  if(G.flashT>0){
+    ctx.save();ctx.globalAlpha=(G.flashT/16)*0.15;
+    ctx.fillStyle=C.brightGreen;ctx.fillRect(0,0,W,H);ctx.restore();
+  }
+  if(G.latteFlashT>0){
+    ctx.save();ctx.globalAlpha=(G.latteFlashT/35)*0.25;
+    ctx.fillStyle=C.yellow;ctx.fillRect(0,0,W,H);ctx.restore();
+  }
+
+  // Boost banner
+  if(G.boosted){
+    ctx.save(); ctx.globalAlpha=0.8+0.2*Math.sin(G.frame*0.25);
+    ctx.font='bold 14px -apple-system,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    var bc2=G.frame%18;
+    ctx.fillStyle=bc2<6?C.yellow:bc2<12?C.latte:C.offWhite;
+    ctx.fillText('★ LATTE INVINCIBILITY MODE ★',W/2,H*0.07);
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle=C.yellow;ctx.lineWidth=3;ctx.globalAlpha=0.6;
+    ctx.beginPath();ctx.arc(G.bird.x,G.bird.y,30,-Math.PI/2,-Math.PI/2+Math.PI*2*G.booster);
+    ctx.stroke();ctx.restore();
+  }
+
+  // Grace period
+  if(inGrace){
+    ctx.save();ctx.globalAlpha=(G.gracePeriod/60)*0.7;
+    ctx.font='bold 13px -apple-system,sans-serif';
+    ctx.fillStyle=C.latte;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('✦ SMOOTH LANDING ✦',W/2,H*0.07);
+    ctx.restore();
+  }
+
+  // Coffee warning
+  if(G.coffeePenalty>0){
+    ctx.save();ctx.globalAlpha=0.7+0.3*Math.sin(G.frame*0.3);
+    ctx.font='bold 12px -apple-system,sans-serif';
+    ctx.fillStyle=C.red;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('COFFEE CRASH — FLAP HARDER!',W/2,H*0.12);
+    ctx.restore();
+  }
+
+  // Low energy warning
+  if(G.energy<0.25&&!G.boosted&&!inGrace){
+    ctx.save();ctx.globalAlpha=0.6+0.4*Math.sin(G.frame*0.2);
+    ctx.font='bold 13px -apple-system,sans-serif';
+    ctx.fillStyle=C.red;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('⚠ COLLECT LEAVES!',W/2,H*0.09);
+    ctx.restore();
+  }
+
+  drawCan(G.bird.x,G.bird.y,G.bird.angle,G.bird.wFlap,G.energy,G.boosted,G.frame,G.coffeePenalty>0,inGrace);
+
+  // Bars
+  var ep=G.energy;
+  var ef=document.getElementById('ebar-fill');
+  ef.style.width=(G.boosted||inGrace?100:ep*100)+'%';
+  ef.style.background=G.boosted?'#f5dfc0':inGrace?C.latte:
+    ep<0.25?C.red:ep<0.5?'#d4900a':C.brightGreen;
+  var bf=document.getElementById('bbar-fill');
+  bf.style.width=(G.booster*100)+'%';
+  bf.style.background=G.boosted?C.yellow:C.latte;
+  document.getElementById('sc').textContent=G.score;
+  document.getElementById('hs').textContent=hi;
+}
+
+// ── LOOP / DIE / START ────────────────────────────────────────────────────
+function loop(){
+  if(G.state==='running') update();
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+function die(title,msg){
+  G.state='dead';
+  if(G.score>hi) hi=G.score;
+  var finalScore=G.score;
+  burst(G.bird.x,G.bird.y,C.red,20);
+  setTimeout(function(){
+    document.getElementById('oh').textContent=title;
+    document.getElementById('op').innerHTML=msg;
+    document.getElementById('fn').style.display='block';
+    document.getElementById('fn').textContent=finalScore;
+    document.getElementById('fb').style.display='block';
+    document.getElementById('fb').textContent='🏆 BEST: '+hi;
+    document.getElementById('startBtn').textContent='FLY AGAIN';
+    document.getElementById('ov').classList.remove('hide');
+    document.dispatchEvent(new CustomEvent('tenzo:die',{detail:{score:finalScore}}));
+  },500);
+}
+function startGame(){
+  if(raf) cancelAnimationFrame(raf);
+  G=newGame();
+  document.getElementById('ov').classList.add('hide');
+  document.getElementById('fn').style.display='none';
+  document.getElementById('fb').style.display='none';
+  document.dispatchEvent(new CustomEvent('tenzo:start'));
+  loop();
+}
+
+})();
+
+// ── LEADERBOARD ──────────────────────────────────────────────────────────────
+(function(){
+  var SUPABASE_URL = 'REPLACE_WITH_SUPABASE_URL';
+  var SUPABASE_KEY = 'REPLACE_WITH_SUPABASE_ANON_KEY';
+
+  var lastScore = 0;
+  var submittedName = localStorage.getItem('tenzo_player_name') || '';
+  var submitted = false;
+
+  function sbFetch(method, path, body){
+    return fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      method: method,
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method === 'POST' ? 'return=minimal' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+  }
+
+  function loadLeaderboard(){
+    sbFetch('GET', 'leaderboard?select=name,score&order=score.desc&limit=10')
+      .then(function(r){ return r.json(); })
+      .then(function(rows){
+        var html = '';
+        rows.forEach(function(row, i){
+          var isMe = submittedName && row.name === submittedName && row.score === lastScore;
+          html += '<div class="lb-row' + (isMe ? ' lb-me' : '') + '">' +
+            '<div class="lb-rank">' + (i+1) + '</div>' +
+            '<div class="lb-name">' + escHtml(row.name) + '</div>' +
+            '<div class="lb-score">' + row.score + '</div>' +
+            '</div>';
+        });
+        document.getElementById('lb-rows').innerHTML = html || '<div style="color:rgba(255,255,255,.4);font-size:11px;text-align:center;padding:8px">No scores yet — be first!</div>';
+      })
+      .catch(function(){ });
+  }
+
+  function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function showLeaderboard(score){
+    lastScore = score;
+    submitted = false;
+    var nameInput = document.getElementById('player-name');
+    nameInput.value = submittedName;
+    document.getElementById('submit-msg').textContent = '';
+    document.getElementById('lb-section').classList.add('show');
+    loadLeaderboard();
+  }
+
+  function hideLeaderboard(){
+    document.getElementById('lb-section').classList.remove('show');
+  }
+
+  document.getElementById('submit-btn').addEventListener('click', function(){
+    var name = document.getElementById('player-name').value.trim();
+    if(!name){ document.getElementById('submit-msg').textContent = 'Enter your name first'; return; }
+    if(lastScore === 0){ document.getElementById('submit-msg').textContent = 'Score too low to post'; return; }
+    submittedName = name;
+    localStorage.setItem('tenzo_player_name', name);
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-msg').textContent = 'Posting...';
+    sbFetch('POST', 'leaderboard', { name: name, score: lastScore })
+      .then(function(r){
+        if(r.ok || r.status === 201){
+          document.getElementById('submit-msg').textContent = 'Posted!';
+          submitted = true;
+          loadLeaderboard();
+        } else {
+          document.getElementById('submit-msg').textContent = 'Error — try again';
+          document.getElementById('submit-btn').disabled = false;
+        }
+      })
+      .catch(function(){
+        document.getElementById('submit-msg').textContent = 'Network error';
+        document.getElementById('submit-btn').disabled = false;
+      });
+  });
+
+  // Hook into game events
+  var origDie = window.__tenzoOnDie;
+  document.addEventListener('tenzo:die', function(e){
+    showLeaderboard(e.detail.score);
+  });
+  document.addEventListener('tenzo:start', function(){
+    hideLeaderboard();
+    document.getElementById('submit-btn').disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
