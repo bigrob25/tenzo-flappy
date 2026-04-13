@@ -1177,11 +1177,14 @@ function startGame(){
   function showRules(){ rulesOv.classList.remove('hide'); }
   function hideRules(){ rulesOv.classList.add('hide'); }
 
-  closeBtn.addEventListener('click', function(){
+  function doClose(e){
+    if(e && e.cancelable) e.preventDefault();
     localStorage.setItem('tenzo_rules_seen','1');
     hideRules();
-    document.getElementById('startBtn').click();
-  });
+    if(window._tenzoStart) window._tenzoStart();
+  }
+  closeBtn.addEventListener('click', doClose);
+  closeBtn.addEventListener('touchend', doClose);
   htpLink.addEventListener('click', showRules);
 
   // Intercept first LET'S FLY click — show rules instead of starting game
@@ -1194,6 +1197,9 @@ function startGame(){
     }
   }, true); // capture phase so it fires before the game's listener
 })();
+
+// Expose startGame for rules overlay
+window._tenzoStart = startGame;
 
 // Kick off the splash animation immediately
 splashLoop();
