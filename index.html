@@ -863,7 +863,7 @@ function drawParts(){
 function newGame(){
   resize();
   return {
-    frame:0,state:'running',score:0,
+    frame:0,state:'ready',score:0,
     bird:{x:W*0.22,y:H*0.4,vy:0,angle:0,wFlap:0,wDir:1},
     energy:1,booster:0,boosted:false,coffeePenalty:0,gracePeriod:0,
     trail:[],
@@ -880,6 +880,7 @@ function newGame(){
 // ── INPUT ─────────────────────────────────────────────────────────────────
 function flap(){
   if(!G||G.state==='dead') return;
+  if(G.state==='ready'){ G.state='running'; }
   var str=G.boosted?FLAP*0.4:FLAP;
   if(G.coffeePenalty>0) str=str*0.4;
   G.bird.vy=str;
@@ -899,6 +900,15 @@ document.getElementById('cw').addEventListener('touchstart',function(e){
 function update(){
   var b=G.bird;
   G.frame++;
+
+  // Ready state — hover and wait for first tap
+  if(G.state==='ready'){
+    b.y = H*0.4 + Math.sin(G.frame*0.07)*8;
+    b.angle = Math.sin(G.frame*0.07)*0.12;
+    b.wFlap += b.wDir*0.2; if(b.wFlap>0.65)b.wDir=-1; if(b.wFlap<-0.1)b.wDir=1;
+    return;
+  }
+
   G.coffeePenalty=Math.max(0,G.coffeePenalty-1);
   G.gracePeriod=Math.max(0,G.gracePeriod-1);
   var inGrace=G.gracePeriod>0;
@@ -1081,6 +1091,19 @@ function draw(){
     ctx.shadowColor = isLastSec ? 'rgba(180,0,0,0.6)' : 'rgba(0,0,0,0.5)';
     ctx.shadowBlur = 8;
     ctx.fillText(secsDisplay + 's', 0, 0);
+    ctx.restore();
+  }
+
+  // Tap to start prompt
+  if(G.state==='ready'){
+    ctx.save();
+    ctx.globalAlpha=0.6+0.4*Math.sin(G.frame*0.1);
+    ctx.font='bold 15px -apple-system,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillStyle='#ffffff';
+    ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=8;
+    ctx.fillText('TAP TO START',W/2,H*0.62);
+    ctx.shadowBlur=0;
     ctx.restore();
   }
 
