@@ -400,32 +400,76 @@ function drawCan(bx,by,angle,wFlap,energy,boosted,frame,coffeed,inGrace){
   ctx.restore();
 }
 
-// ── BAMBOO (flat bold illustration style) ────────────────────────────────
+// ── BAMBOO (realistic cylindrical style) ─────────────────────────────────
 function drawBambooStalk(ox,clipY,clipH,pw,light,mid,dark,node){
   ctx.save();
   ctx.beginPath(); ctx.rect(ox,clipY,pw,clipH); ctx.clip();
-  var segH=36;
+  var segH=38;
   var segs=Math.ceil(clipH/segH)+2;
+  var boostedStalk=(mid===C.mintGreen); // detect boost mode by colour arg
+
   for(var s=0;s<segs;s++){
     var sy=clipY+s*segH;
-    // Segment — flat colour with white highlight stripe like illustration
-    ctx.fillStyle=mid; ctx.fillRect(ox,sy,pw,segH-4);
-    // Left shadow
-    ctx.fillStyle=dark; ctx.fillRect(ox,sy,5,segH-4);
-    // Right shadow
-    ctx.fillStyle=dark; ctx.fillRect(ox+pw-5,sy,5,segH-4);
-    // White highlight stripe
-    ctx.fillStyle='rgba(255,255,255,0.35)';
-    ctx.fillRect(ox+7,sy+3,pw-14,5);
-    // Node band
-    ctx.fillStyle=node; ctx.fillRect(ox-3,sy+segH-4,pw+6,7);
-    ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillRect(ox-1,sy+segH-3,pw+2,3);
-    // Node outline
-    ctx.strokeStyle=C.outline; ctx.lineWidth=1.5;
-    ctx.strokeRect(ox-3,sy+segH-4,pw+6,7);
+    var bodyH=segH-6;
+
+    // Cylindrical body gradient
+    var g=ctx.createLinearGradient(ox,0,ox+pw,0);
+    if(boostedStalk){
+      g.addColorStop(0,   '#3a6e10');
+      g.addColorStop(0.12,'#6aaa28');
+      g.addColorStop(0.38,'#a8d84a');
+      g.addColorStop(0.50,'#c8f060');
+      g.addColorStop(0.62,'#a8d84a');
+      g.addColorStop(0.85,'#6aaa28');
+      g.addColorStop(1,   '#3a6e10');
+    } else {
+      g.addColorStop(0,   '#294f14');
+      g.addColorStop(0.12,'#4a8a22');
+      g.addColorStop(0.36,'#78b83a');
+      g.addColorStop(0.50,'#9ed050');
+      g.addColorStop(0.64,'#78b83a');
+      g.addColorStop(0.85,'#4a8a22');
+      g.addColorStop(1,   '#294f14');
+    }
+    ctx.fillStyle=g;
+    ctx.fillRect(ox,sy,pw,bodyH);
+
+    // Specular highlight — thin bright strip left of centre
+    ctx.fillStyle='rgba(255,255,255,0.45)';
+    ctx.fillRect(ox+pw*0.3,sy+2,pw*0.1,bodyH-4);
+
+    // Soft secondary shimmer
+    ctx.fillStyle='rgba(255,255,255,0.12)';
+    ctx.fillRect(ox+pw*0.18,sy+4,pw*0.22,bodyH-8);
+
+    // Node ring — slightly wider, darker, with top highlight and bottom shadow
+    var ny=sy+bodyH;
+    var ng=ctx.createLinearGradient(ox-3,0,ox+pw+3,0);
+    if(boostedStalk){
+      ng.addColorStop(0,'#2a5c10'); ng.addColorStop(0.5,'#5aaa20'); ng.addColorStop(1,'#2a5c10');
+    } else {
+      ng.addColorStop(0,'#1e4010'); ng.addColorStop(0.5,'#3d7a1e'); ng.addColorStop(1,'#1e4010');
+    }
+    ctx.fillStyle=ng;
+    ctx.fillRect(ox-3,ny,pw+6,8);
+    // Node top highlight
+    ctx.fillStyle='rgba(255,255,255,0.28)';
+    ctx.fillRect(ox+1,ny,pw-2,2);
+    // Node bottom shadow
+    ctx.fillStyle='rgba(0,0,0,0.22)';
+    ctx.fillRect(ox-3,ny+6,pw+6,2);
   }
-  // Outer outline
-  ctx.strokeStyle=C.outline; ctx.lineWidth=2.5;
+
+  // Edge vignette for roundness
+  var ev=ctx.createLinearGradient(ox,0,ox+pw,0);
+  ev.addColorStop(0,'rgba(0,0,0,0.28)');
+  ev.addColorStop(0.18,'rgba(0,0,0,0)');
+  ev.addColorStop(0.82,'rgba(0,0,0,0)');
+  ev.addColorStop(1,'rgba(0,0,0,0.28)');
+  ctx.fillStyle=ev; ctx.fillRect(ox,clipY,pw,clipH);
+
+  // Outer stroke
+  ctx.strokeStyle='#1e4010'; ctx.lineWidth=2;
   ctx.strokeRect(ox,clipY,pw,clipH);
   ctx.restore();
 }
@@ -469,16 +513,33 @@ function drawBambooTipLeaves(tx,ty,dir){
 }
 
 function drawBambooCutEnd(ox,y,pw){
-  ctx.fillStyle=C.darkGreen;
-  ctx.fillRect(ox-2,y-4,pw+4,6);
-  // Hollow inner
-  ctx.fillStyle='rgba(0,0,0,0.4)';
-  ctx.fillRect(ox+4,y-2,pw-8,4);
-  // White edge highlight
+  var cx=ox+pw/2;
+  // Rim — cylindrical gradient like the stalk
+  var rg=ctx.createLinearGradient(ox-2,0,ox+pw+2,0);
+  rg.addColorStop(0,'#1e4010'); rg.addColorStop(0.5,'#4a8a22'); rg.addColorStop(1,'#1e4010');
+  ctx.fillStyle=rg;
+  ctx.fillRect(ox-3,y-5,pw+6,9);
+  // Top highlight on rim
   ctx.fillStyle='rgba(255,255,255,0.3)';
-  ctx.fillRect(ox-1,y-4,pw+2,2);
-  ctx.strokeStyle=C.outline; ctx.lineWidth=2;
-  ctx.strokeRect(ox-2,y-4,pw+4,6);
+  ctx.fillRect(ox,y-5,pw,2);
+  // Hollow interior — dark ellipse
+  ctx.fillStyle='#0f2208';
+  ctx.beginPath();
+  ctx.ellipse(cx,y,pw*0.32,4,0,0,Math.PI*2);
+  ctx.fill();
+  // Inner wall ring
+  ctx.strokeStyle='#2a5c14'; ctx.lineWidth=1.5;
+  ctx.beginPath();
+  ctx.ellipse(cx,y,pw*0.32,4,0,0,Math.PI*2);
+  ctx.stroke();
+  // Tiny highlight inside hollow
+  ctx.fillStyle='rgba(255,255,255,0.12)';
+  ctx.beginPath();
+  ctx.ellipse(cx-pw*0.08,y-1,pw*0.1,1.8,0,0,Math.PI*2);
+  ctx.fill();
+  // Outer rim stroke
+  ctx.strokeStyle='#1e4010'; ctx.lineWidth=2;
+  ctx.strokeRect(ox-3,y-5,pw+6,9);
 }
 
 function drawBamboo(px,topH,botY,boosted,frame){
