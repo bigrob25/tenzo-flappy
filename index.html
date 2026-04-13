@@ -1007,19 +1007,44 @@ function draw(){
     ctx.fillStyle=C.yellow;ctx.fillRect(0,0,W,H);ctx.restore();
   }
 
-  // Boost banner
+  // Boost banner + countdown
   if(G.boosted){
+    var secsLeft = G.booster / BOOST_DRN / 60;
+    var secsDisplay = Math.ceil(secsLeft);
+    var isLastSec = secsLeft < 1.2;
+    var bc2=G.frame%18;
+    var boostCol = bc2<6?C.yellow:bc2<12?C.latte:C.offWhite;
+
+    // Banner
     ctx.save(); ctx.globalAlpha=0.8+0.2*Math.sin(G.frame*0.25);
     ctx.font='bold 14px -apple-system,sans-serif';
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    var bc2=G.frame%18;
-    ctx.fillStyle=bc2<6?C.yellow:bc2<12?C.latte:C.offWhite;
-    ctx.fillText('🥛 SUPER LATTE MODE 🥛',W/2,H*0.07);
+    ctx.fillStyle = isLastSec ? C.red : boostCol;
+    ctx.fillText(isLastSec ? '⚠ BRACE YOURSELF! ⚠' : '🥛 SUPER LATTE MODE 🥛', W/2, H*0.07);
     ctx.restore();
+
+    // Arc ring around character
     ctx.save();
-    ctx.strokeStyle=C.yellow;ctx.lineWidth=3;ctx.globalAlpha=0.6;
-    ctx.beginPath();ctx.arc(G.bird.x,G.bird.y,30,-Math.PI/2,-Math.PI/2+Math.PI*2*G.booster);
-    ctx.stroke();ctx.restore();
+    ctx.strokeStyle = isLastSec ? C.red : C.yellow;
+    ctx.lineWidth = isLastSec ? 4 : 3;
+    ctx.globalAlpha = isLastSec ? 0.5+0.5*Math.sin(G.frame*0.4) : 0.6;
+    ctx.beginPath();
+    ctx.arc(G.bird.x, G.bird.y, 32, -Math.PI/2, -Math.PI/2 + Math.PI*2*G.booster);
+    ctx.stroke();
+    ctx.restore();
+
+    // Countdown number above character
+    var numScale = isLastSec ? 1+0.15*Math.sin(G.frame*0.5) : 1;
+    ctx.save();
+    ctx.translate(G.bird.x, G.bird.y - 52);
+    ctx.scale(numScale, numScale);
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold 22px -apple-system,sans-serif';
+    ctx.fillStyle = isLastSec ? C.red : C.yellow;
+    ctx.shadowColor = isLastSec ? 'rgba(180,0,0,0.6)' : 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 8;
+    ctx.fillText(secsDisplay + 's', 0, 0);
+    ctx.restore();
   }
 
   // Grace period
