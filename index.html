@@ -1183,8 +1183,15 @@ function startGame(){
   });
   htpLink.addEventListener('click', showRules);
 
-  // Show on first visit
-  if(!localStorage.getItem('tenzo_rules_seen')) showRules();
+  // Intercept first LET'S FLY click — show rules instead of starting game
+  var startBtn = document.getElementById('startBtn');
+  var origClick = startBtn.onclick;
+  startBtn.addEventListener('click', function(e){
+    if(!localStorage.getItem('tenzo_rules_seen')){
+      e.stopImmediatePropagation();
+      showRules();
+    }
+  }, true); // capture phase so it fires before the game's listener
 })();
 
 // Kick off the splash animation immediately
