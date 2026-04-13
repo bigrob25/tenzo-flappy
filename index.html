@@ -22,7 +22,7 @@
 body{
   background:#3a6b3a;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:100vh;overflow:hidden;touch-action:none;
+  min-height:100vh;overflow:hidden;touch-action:pan-y;
   font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
 }
 #wrap{width:min(400px,100vw);display:flex;flex-direction:column;align-items:center;gap:8px;}
@@ -34,7 +34,7 @@ body{
   border-radius:20px;padding:5px 14px;letter-spacing:1px;}
 #cw{position:relative;border-radius:16px;overflow:hidden;
   box-shadow:0 0 0 3px #1a3a1a,0 20px 60px rgba(0,0,0,0.5);}
-canvas{display:block;}
+canvas{display:block;touch-action:none;}
 #bars{width:100%;padding:0 6px;display:flex;flex-direction:column;gap:5px;}
 .bar-row{display:flex;align-items:center;gap:8px;}
 .bar-label{font-size:11px;font-weight:800;letter-spacing:1px;white-space:nowrap;width:72px;color:#fff;}
