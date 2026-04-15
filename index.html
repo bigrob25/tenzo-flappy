@@ -1240,28 +1240,17 @@ splashLoop();
 (function(){
   var SUPABASE_URL = 'https://nlgatvkvghjpygzrstig.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_MyitQ42772UNynCkWMqL5w_IymR0KAJ';
+  var EDGE_FN      = SUPABASE_URL + '/functions/v1/score';
 
-  var MAX_SCORE = 2000;
-  var lastScore = 0;
-  var lastSid = null;
+  var lastScore    = 0;
+  var scoreProof   = null;  // {token, nonce, ts} signed by Edge Function
   var submittedName = localStorage.getItem('tenzo_player_name') || '';
-  var submitted = false;
-
-  function sbFetch(method, path, body){
-    return fetch(SUPABASE_URL + '/rest/v1/' + path, {
-      method: method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=minimal' : ''
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
-  }
+  var submitted    = false;
 
   function loadLeaderboard(){
-    sbFetch('GET', 'leaderboard?select=name,score&order=score.desc&limit=25')
+    fetch(SUPABASE_URL + '/rest/v1/leaderboard?select=name,score&order=score.desc&limit=25', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    })
       .then(function(r){ return r.json(); })
       .then(function(rows){
         var html = '';
@@ -1282,13 +1271,30 @@ splashLoop();
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  // Request a server-signed proof for this score immediately when the game ends.
+  // The proof is an HMAC token only the Edge Function can generate, so a score
+  // cannot be submitted without first obtaining a valid token from the server.
+  function fetchScoreProof(score){
+    scoreProof = null;
+    fetch(EDGE_FN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'token', score: score })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.token) scoreProof = data;
+      })
+      .catch(function(){ });
+  }
+
   function showLeaderboard(score){
     lastScore = score;
     submitted = false;
-    var nameInput = document.getElementById('player-name');
-    nameInput.value = submittedName;
+    document.getElementById('player-name').value = submittedName;
     document.getElementById('submit-msg').textContent = '';
     document.getElementById('lb-section').classList.add('show');
+    fetchScoreProof(score);
     loadLeaderboard();
   }
 
@@ -1300,21 +1306,37 @@ splashLoop();
     var name = document.getElementById('player-name').value.trim();
     if(!name){ document.getElementById('submit-msg').textContent = 'Enter your name first'; return; }
     if(lastScore <= 0){ document.getElementById('submit-msg').textContent = 'Score too low to post'; return; }
-    if(lastScore > MAX_SCORE){ document.getElementById('submit-msg').textContent = 'Score not valid'; return; }
-    if(!lastSid || lastSid !== window._tenzoSid){ document.getElementById('submit-msg').textContent = 'Play a game first!'; return; }
     if(submitted){ document.getElementById('submit-msg').textContent = 'Already posted!'; return; }
+    if(!scoreProof){
+      // Proof not ready yet (slow network) — try fetching again
+      document.getElementById('submit-msg').textContent = 'Securing score, try again...';
+      fetchScoreProof(lastScore);
+      return;
+    }
     submittedName = name;
     localStorage.setItem('tenzo_player_name', name);
     document.getElementById('submit-btn').disabled = true;
     document.getElementById('submit-msg').textContent = 'Posting...';
-    sbFetch('POST', 'leaderboard', { name: name, score: lastScore })
-      .then(function(r){
-        if(r.ok || r.status === 201){
+    fetch(EDGE_FN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'submit',
+        name:   name,
+        score:  lastScore,
+        token:  scoreProof.token,
+        nonce:  scoreProof.nonce,
+        ts:     scoreProof.ts
+      })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.ok){
           document.getElementById('submit-msg').textContent = 'Posted!';
           submitted = true;
           loadLeaderboard();
         } else {
-          document.getElementById('submit-msg').textContent = 'Error — try again';
+          document.getElementById('submit-msg').textContent = data.error || 'Error — try again';
           document.getElementById('submit-btn').disabled = false;
         }
       })
@@ -1326,11 +1348,10 @@ splashLoop();
 
   // Hook into game events
   document.addEventListener('tenzo:die', function(e){
-    lastSid = (e.detail && e.detail.sid) || null;
     showLeaderboard(e.detail.score);
   });
   document.addEventListener('tenzo:start', function(){
-    lastSid = null;
+    scoreProof = null;
     hideLeaderboard();
     document.getElementById('submit-btn').disabled = false;
   });
