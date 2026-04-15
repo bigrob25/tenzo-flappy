@@ -1179,7 +1179,7 @@ function die(title,msg){
     document.getElementById('fb').textContent='🏆 BEST: '+hi;
     document.getElementById('startBtn').textContent='FLY AGAIN';
     ov.classList.remove('hide');
-    document.dispatchEvent(new CustomEvent('tenzo:die',{detail:{score:finalScore}}));
+    document.dispatchEvent(new CustomEvent('tenzo:die',{detail:{score:finalScore,sid:window._tenzoSid}}));
   },500);
 }
 function startGame(){
@@ -1193,6 +1193,7 @@ function startGame(){
   document.getElementById('op').classList.remove('show');
   document.getElementById('fn').style.display='none';
   document.getElementById('fb').style.display='none';
+  window._tenzoSid = Math.random().toString(36).slice(2) + Date.now().toString(36);
   document.dispatchEvent(new CustomEvent('tenzo:start'));
   loop();
 }
@@ -1240,7 +1241,9 @@ splashLoop();
   var SUPABASE_URL = 'https://nlgatvkvghjpygzrstig.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_MyitQ42772UNynCkWMqL5w_IymR0KAJ';
 
+  var MAX_SCORE = 2000;
   var lastScore = 0;
+  var lastSid = null;
   var submittedName = localStorage.getItem('tenzo_player_name') || '';
   var submitted = false;
 
@@ -1296,7 +1299,10 @@ splashLoop();
   document.getElementById('submit-btn').addEventListener('click', function(){
     var name = document.getElementById('player-name').value.trim();
     if(!name){ document.getElementById('submit-msg').textContent = 'Enter your name first'; return; }
-    if(lastScore === 0){ document.getElementById('submit-msg').textContent = 'Score too low to post'; return; }
+    if(lastScore <= 0){ document.getElementById('submit-msg').textContent = 'Score too low to post'; return; }
+    if(lastScore > MAX_SCORE){ document.getElementById('submit-msg').textContent = 'Score not valid'; return; }
+    if(!lastSid || lastSid !== window._tenzoSid){ document.getElementById('submit-msg').textContent = 'Play a game first!'; return; }
+    if(submitted){ document.getElementById('submit-msg').textContent = 'Already posted!'; return; }
     submittedName = name;
     localStorage.setItem('tenzo_player_name', name);
     document.getElementById('submit-btn').disabled = true;
@@ -1319,11 +1325,12 @@ splashLoop();
   });
 
   // Hook into game events
-  var origDie = window.__tenzoOnDie;
   document.addEventListener('tenzo:die', function(e){
+    lastSid = (e.detail && e.detail.sid) || null;
     showLeaderboard(e.detail.score);
   });
   document.addEventListener('tenzo:start', function(){
+    lastSid = null;
     hideLeaderboard();
     document.getElementById('submit-btn').disabled = false;
   });
