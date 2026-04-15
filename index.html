@@ -888,7 +888,7 @@ function flap(){
   if(!G||G.state==='dead'||G.energyFall) return;
   if(G.state==='ready'){ G.state='running'; }
   var str=G.boosted?FLAP*0.4:FLAP;
-  if(G.coffeePenalty>0) str=str*0.4;
+  if(G.coffeePenalty>0) str=str*0.55;
   G.bird.vy=str;
   var col=G.coffeePenalty>0?'#8b4513':G.boosted?C.yellow:C.brightGreen;
   burst(G.bird.x-8,G.bird.y,col,5);
