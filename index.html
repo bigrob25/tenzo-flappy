@@ -871,7 +871,7 @@ function newGame(){
   return {
     frame:0,state:'ready',score:0,
     bird:{x:W*0.22,y:H*0.4,vy:0,angle:0,wFlap:0,wDir:1},
-    energy:1,booster:0,boosted:false,coffeePenalty:0,gracePeriod:0,
+    energy:1,booster:0,boosted:false,coffeePenalty:0,gracePeriod:0,energyFall:false,
     trail:[],
     pipes:[],nextPipe:100,
     leaves:[],nextLeaf:55,
@@ -885,7 +885,7 @@ function newGame(){
 
 // ── INPUT ─────────────────────────────────────────────────────────────────
 function flap(){
-  if(!G||G.state==='dead') return;
+  if(!G||G.state==='dead'||G.energyFall) return;
   if(G.state==='ready'){ G.state='running'; }
   var str=G.boosted?FLAP*0.4:FLAP;
   if(G.coffeePenalty>0) str=str*0.4;
@@ -921,7 +921,7 @@ function update(){
 
   if(!G.boosted&&!inGrace){
     G.energy=Math.max(0,G.energy-E_DRAIN);
-    if(G.energy<=0){die('ENERGY DRAINED!','Every sip is a fresh start. 🍃');return;}
+    if(G.energy<=0&&!G.energyFall) G.energyFall=true;
   }
   if(G.boosted){
     G.booster=Math.max(0,G.booster-BOOST_DRN);
@@ -941,7 +941,11 @@ function update(){
   G.trail.push({x:b.x,y:b.y}); if(G.trail.length>30)G.trail.shift();
 
   if(!G.boosted&&!inGrace){
-    if(b.y>H-38||b.y<8){die('STAY FOCUSED!','Better luck tomorrow. Keep going!');return;}
+    if(G.energyFall){
+      if(b.y>H-38){die('ENERGY DRAINED!','Every sip is a fresh start. 🍃');return;}
+    } else {
+      if(b.y>H-38||b.y<8){die('STAY FOCUSED!','Better luck tomorrow. Keep going!');return;}
+    }
   } else {
     if(b.y>H-38){b.y=H-38;b.vy=-2;} if(b.y<8){b.y=8;b.vy=2;}
   }
@@ -959,7 +963,7 @@ function update(){
   for(var i=G.pipes.length-1;i>=0;i--){
     var p=G.pipes[i]; p.x-=G.speed;
     if(p.x<-80){G.pipes.splice(i,1);continue;}
-    if(G.boosted||inGrace) continue;
+    if(G.boosted||inGrace||G.energyFall) continue;
     if(circleRect(b.x,b.y,13,p.x-14,0,28,p.topH)){die('STAY FOCUSED!','Find your flow and try again.');return;}
     if(circleRect(b.x,b.y,13,p.x-14,p.botY,28,H-p.botY)){die('STAY FOCUSED!','Find your flow and try again.');return;}
   }
@@ -975,7 +979,11 @@ function update(){
     if(lf.x<-40){G.leaves.splice(j,1);continue;}
     var dx=b.x-lf.x,dy=b.y-lf.y;
     if(dx*dx+dy*dy<24*24){
-      G.energy=Math.min(1,G.energy+E_LEAF);
+      if(G.energyFall){
+        G.energy=0.15; G.energyFall=false;
+      } else {
+        G.energy=Math.min(1,G.energy+E_LEAF);
+      }
       burst(lf.x,lf.y,C.yellow,10); G.flashT=16; G.leaves.splice(j,1);
     }
   }
