@@ -1008,7 +1008,7 @@ function update(){
     var wf=G.falls[wi]; wf.x-=G.speed*0.85;
     if(wf.x<-60){G.falls.splice(wi,1);continue;}
     if(!G.boosted&&!inGrace&&b.x>wf.x-wf.ww/2-8&&b.x<wf.x+wf.ww/2+8&&b.y<wf.wh){
-      b.vy+=2.8; burst(b.x,b.y,'rgba(180,230,255,0.9)',3);
+      b.vy+=2.1; burst(b.x,b.y,'rgba(180,230,255,0.9)',3);
     }
   }
 
